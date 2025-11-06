@@ -10,10 +10,10 @@ import Foundation
 
 // MARK: - Geometry Protocol
 
-/// Any KmlElement type to be used in *Geometry* objects of a KML document.
+/// Any KMLObject type to be used in *Geometry* objects of a KML document.
 ///
 /// For definition, see [KML spec](https://developers.google.com/kml/documentation/kmlreference#geometry)
-public protocol KMLGeometry: KmlElement {
+public protocol KMLGeometry: KMLObject {
     /// Type-level definition to map conforming type to a known KML Geometry class.
     static var geometryType: KMLGeometryType { get }
 }
@@ -21,5 +21,29 @@ public protocol KMLGeometry: KmlElement {
 public extension KMLGeometry {
     static var kmlTag: String {
         geometryType.rawValue
+    }
+}
+
+// MARK: - Known Geometry Types
+
+/// Helper to map between Geometry objects in a KML file and this library's corresponding `KMLGeometry`.
+public enum KMLGeometryType: String, CaseIterable {
+    case lineString = "LineString"
+    case polygon = "Polygon"
+    case point = "Point"
+    case multiGeometry = "MultiGeometry"
+
+    /// The RCKML type that corresponds to this KML Geometry class.
+    var concreteType: KMLGeometry.Type {
+        switch self {
+        case .lineString:
+            KMLLineString.self
+        case .polygon:
+            KMLPolygon.self
+        case .point:
+            KMLPoint.self
+        case .multiGeometry:
+            KMLMultiGeometry.self
+        }
     }
 }

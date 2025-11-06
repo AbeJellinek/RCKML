@@ -27,9 +27,9 @@ public struct KMLLineStyle {
     }
 }
 
-// MARK: - KmlElement
+// MARK: - KMLObject
 
-extension KMLLineStyle: KmlElement {
+extension KMLLineStyle: KMLObject {
     public static var kmlTag: String {
         "LineStyle"
     }

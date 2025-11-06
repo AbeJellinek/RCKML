@@ -37,9 +37,9 @@ public struct KMLDocument {
     }
 }
 
-// MARK: - KmlElement
+// MARK: - KMLObject
 
-extension KMLDocument: KmlElement {
+extension KMLDocument: KMLObject {
     public static var kmlTag: String {
         "Document"
     }

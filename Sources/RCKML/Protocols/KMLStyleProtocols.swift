@@ -12,7 +12,7 @@ import Foundation
 /// which is the base type for *Style* and *StyleMap*.
 ///
 /// For definition, see [KML spec](https://developers.google.com/kml/documentation/kmlreference#styleselector)
-public protocol KMLStyleSelector: KmlElement {
+public protocol KMLStyleSelector: KMLObject {
     /// Identifier of the KML element, which can be set in order to read
     /// styles from the main body of the KML document via a *KMLStyleMap*
     var id: String? { get }
@@ -22,7 +22,7 @@ public protocol KMLStyleSelector: KmlElement {
 /// which is the base type for *LineStyle*, *PolyStyle*, *IconStyle*, and *LabelStyle*
 ///
 /// For definition, see [KML spec](https://developers.google.com/kml/documentation/kmlreference#colorstyle)
-public protocol KMLColorStyle: KmlElement {
+public protocol KMLColorStyle: KMLObject {
     /// Identifier of the KML element, which can be set in order to read
     /// styles from the main body of the KML document via a *KMLStyleMap*
     var id: String? { get }

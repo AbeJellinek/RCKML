@@ -49,7 +49,7 @@ extension KMLCoordinate: CustomStringConvertible {
 
 // MARK: - Coordinate Array
 
-extension Array: KmlElement where Element == KMLCoordinate {
+extension Array: KMLObject where Element == KMLCoordinate {
     public static var kmlTag: String {
         "coordinates"
     }

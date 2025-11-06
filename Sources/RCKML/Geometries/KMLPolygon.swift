@@ -31,7 +31,7 @@ public struct KMLPolygon {
 
 // MARK: KMLElement
 
-extension KMLPolygon: KmlElement {
+extension KMLPolygon: KMLObject {
     private static var outerBoundaryKey: String { "outerBoundaryIs" }
     private static var innerBoundaryKey: String { "innerBoundaryIs" }
 
@@ -96,7 +96,7 @@ public extension KMLPolygon {
 
 // MARK: KMLElement
 
-extension KMLPolygon.LinearRing: KmlElement {
+extension KMLPolygon.LinearRing: KMLObject {
     public static var kmlTag: String {
         "LinearRing"
     }

@@ -36,9 +36,9 @@ public struct KMLPlacemark {
     }
 }
 
-// MARK: - KmlElement
+// MARK: - KMLObject
 
-extension KMLPlacemark: KmlElement {
+extension KMLPlacemark: KMLObject {
     public static var kmlTag: String {
         "Placemark"
     }

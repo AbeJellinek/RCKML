@@ -29,7 +29,7 @@ public struct KMLPoint {
 
 // MARK: KMLElement
 
-extension KMLPoint: KmlElement {
+extension KMLPoint: KMLObject {
     public init(xml: AEXMLElement) throws {
         try Self.verifyXmlTag(xml)
         let coordElement = try xml.requiredKmlChild(ofType: [KMLCoordinate].self)

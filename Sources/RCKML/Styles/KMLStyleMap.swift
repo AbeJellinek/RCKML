@@ -35,7 +35,7 @@ struct KMLStyleMap {
 
 // MARK: - Internal StyleSelector Protocol Conformance
 
-extension KMLStyleMap: KmlElement, KMLStyleSelector {
+extension KMLStyleMap: KMLObject, KMLStyleSelector {
     static var kmlTag: String {
         "StyleMap"
     }

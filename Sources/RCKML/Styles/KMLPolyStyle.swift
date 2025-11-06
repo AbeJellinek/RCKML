@@ -30,9 +30,9 @@ public struct KMLPolyStyle {
     }
 }
 
-// MARK: - KmlElement
+// MARK: - KMLObject
 
-extension KMLPolyStyle: KmlElement {
+extension KMLPolyStyle: KMLObject {
     public static var kmlTag: String {
         "PolyStyle"
     }

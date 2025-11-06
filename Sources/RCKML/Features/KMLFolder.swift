@@ -28,9 +28,9 @@ public struct KMLFolder {
     }
 }
 
-// MARK: - KmlElement
+// MARK: - KMLObject
 
-extension KMLFolder: KmlElement {
+extension KMLFolder: KMLObject {
     public static var kmlTag: String {
         "Folder"
     }

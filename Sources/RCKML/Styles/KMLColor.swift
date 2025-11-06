@@ -50,9 +50,9 @@ public struct KMLColor {
     }
 }
 
-// MARK: - KmlElement
+// MARK: - KMLObject
 
-extension KMLColor: KmlElement {
+extension KMLColor: KMLObject {
     public static var kmlTag: String {
         "color"
     }

@@ -21,7 +21,7 @@ public struct KMLMultiGeometry {
 
 // MARK: KMLElement
 
-extension KMLMultiGeometry: KmlElement {
+extension KMLMultiGeometry: KMLObject {
     public init(xml: AEXMLElement) throws {
         try Self.verifyXmlTag(xml)
         geometries = try xml.children.compactMap { xmlChild -> KMLGeometry? in

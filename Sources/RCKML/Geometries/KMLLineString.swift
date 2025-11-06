@@ -22,7 +22,7 @@ public struct KMLLineString {
 
 // MARK: KMLElement
 
-extension KMLLineString: KmlElement {
+extension KMLLineString: KMLObject {
     public init(xml: AEXMLElement) throws {
         try Self.verifyXmlTag(xml)
         coordinates = try xml.requiredKmlChild(ofType: [KMLCoordinate].self)
