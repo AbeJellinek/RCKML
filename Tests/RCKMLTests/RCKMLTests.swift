@@ -39,10 +39,10 @@ struct RCKMLTests {
         #expect(kmlStruct.blue * 255.0 == 240)
         #expect(kmlStruct.alpha == 0.5)
 
-        let asString = kmlStruct.colorString
+        let asString = kmlStruct.kmlString
         #expect(asString == "80F0BE78")
 
-        let reconstructed = try KMLColor(asString)
+        let reconstructed = try KMLColor(kmlString: asString)
         #expect(Int(reconstructed.red * 255.0) == 120)
         #expect(Int(reconstructed.green * 255.0) == 190)
         #expect(Int(reconstructed.blue * 255.0) == 240)

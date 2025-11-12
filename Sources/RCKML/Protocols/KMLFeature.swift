@@ -22,6 +22,14 @@ public protocol KMLFeature: KMLObject {
     var featureDescription: String? { get }
 }
 
+extension KMLFeature {
+    public static var kmlTag: String {
+        featureType.rawValue
+    }
+}
+
+typealias KMLCodableFeature = (KMLFeature & KMLCodableObject)
+
 // MARK: - Known Feature Types
 
 /// Helper to map between Feature objects in a KML file and this library's corresponding `KMLFeature`

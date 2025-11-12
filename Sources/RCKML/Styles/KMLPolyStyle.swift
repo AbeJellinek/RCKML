@@ -11,11 +11,15 @@ import Foundation
 /// A style used to determine fill color and whether to draw the outline of a polygon.
 ///
 /// For definition, see [KML Spec](https://developers.google.com/kml/documentation/kmlreference#polystyle)
-public struct KMLPolyStyle {
+public struct KMLPolyStyle: KMLColorStyle {
     public var id: String?
     public var isFilled: Bool
     public var isOutlined: Bool
     public var color: KMLColor?
+
+    public static var kmlTag: String {
+        "PolyStyle"
+    }
 
     public init(
         id: String?,
@@ -30,32 +34,25 @@ public struct KMLPolyStyle {
     }
 }
 
-// MARK: - KMLObject
+// MARK: - KML Codable
 
-extension KMLPolyStyle: KMLObject {
-    public static var kmlTag: String {
-        "PolyStyle"
-    }
-
-    public init(xml: AEXMLElement) throws {
-        try Self.verifyXmlTag(xml)
-        id = xml.attributes["id"]
-        color = xml.optionalKmlChild(ofType: KMLColor.self)
-        isFilled = xml["fill"].bool ?? false
-        isOutlined = xml["outline"].bool ?? true
-    }
-
-    public var xmlElement: AEXMLElement {
-        let element = AEXMLElement(baseFor: KMLPolyStyle.self, id: id)
-        element.addChild(name: "fill", value: isFilled ? "1" : "0")
-        element.addChild(name: "outline", value: isOutlined ? "1" : "0")
-        if let color {
-            element.addChild(color.xmlElement)
-        }
-        return element
-    }
+private extension KMLTagName {
+    static let isFilled = KMLTagName("fill")
+    static let isOutlined = KMLTagName("outline")
 }
 
-// MARK: - KMLColorStyle
+extension KMLPolyStyle: KMLCodableObject {
+    init(xml: AEXMLElement) throws {
+        try Self.verifyXmlTag(xml)
+        id = xml.idAttribute
+        color = try xml.value(of: KMLColor.self, forKey: .color)
+        isFilled = xml.valueIfPresent(of: Bool.self, forKey: .isFilled) ?? false
+        isOutlined = xml.valueIfPresent(of: Bool.self, forKey: .isOutlined) ?? true
+    }
 
-extension KMLPolyStyle: KMLColorStyle {}
+    var children: [any KMLCodable] {
+        KMLValueElement(name: .color, value: color)
+        KMLValueElement(name: .isFilled, value: isFilled)
+        KMLValueElement(name: .isOutlined, value: isOutlined)
+    }
+}

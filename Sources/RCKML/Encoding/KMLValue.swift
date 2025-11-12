@@ -7,6 +7,7 @@
 
 import Foundation
 
+/// <#Description#>
 protocol KMLValue {
     var kmlString: String { get }
     init(kmlString: String) throws

@@ -69,15 +69,25 @@ internal extension KMLContainer {
             else {
                 return nil
             }
-            let res = try featureType.concreteType.init(xml: xmlChild)
+            let res: KMLFeature
+            switch featureType {
+            case .folder:
+                res = try KMLFolder(xml: xmlChild)
+            case .placemark:
+                res = try KMLPlacemark(xml: xmlChild)
+            }
             return res
         }
+    }
+
+    var encodableFeatures: [any KMLCodableFeature] {
+        features.compactMap { $0 as? KMLCodableFeature }
     }
 }
 
 // MARK: - Internal Functions
 
-internal extension KMLContainer {
+extension KMLContainer {
     /// For debug use, prints a string representation of all items inside this container
     /// - Parameter indentation: The indentation level of elements described.
     /// Only to be used inside this function call for recursive indentation.

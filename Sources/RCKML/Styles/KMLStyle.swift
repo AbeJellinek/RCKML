@@ -16,13 +16,17 @@ import Foundation
 /// plus ListStyle.
 ///
 /// For definition, see [KML Spec](https://developers.google.com/kml/documentation/kmlreference#style)
-public struct KMLStyle {
+public struct KMLStyle: KMLStyleSelector {
     public var id: String?
     public var lineStyle: KMLLineStyle?
     public var polyStyle: KMLPolyStyle?
 
     public var isEmpty: Bool {
         lineStyle?.color == nil && polyStyle?.color == nil
+    }
+
+    public static var kmlTag: String {
+        "Style"
     }
 
     public init(
@@ -36,36 +40,19 @@ public struct KMLStyle {
     }
 }
 
-// MARK: - Internal StyleSelector Protocol Conformance
+// MARK: - KML Codable
 
-extension KMLStyle: KMLObject, KMLStyleSelector {
-    public static var kmlTag: String {
-        "Style"
-    }
-
-    public init(xml: AEXMLElement) throws {
+extension KMLStyle: KMLCodableObject {
+    init(xml: AEXMLElement) throws {
         try Self.verifyXmlTag(xml)
-        id = xml.attributes["id"]
+        id = xml.idAttribute
 
-        let lineStyleElement = xml[KMLLineStyle.kmlTag]
-        if lineStyleElement.error == nil {
-            lineStyle = try KMLLineStyle(xml: lineStyleElement)
-        }
-
-        let polyStyleElement = xml[KMLPolyStyle.kmlTag]
-        if polyStyleElement.error == nil {
-            polyStyle = try KMLPolyStyle(xml: polyStyleElement)
-        }
+        lineStyle = xml.children(of: KMLLineStyle.self).first
+        polyStyle = xml.children(of: KMLPolyStyle.self).first
     }
 
-    public var xmlElement: AEXMLElement {
-        let element = AEXMLElement(baseFor: KMLStyle.self, id: id)
-        if let lineStyle {
-            element.addChild(lineStyle.xmlElement)
-        }
-        if let polyStyle {
-            element.addChild(polyStyle.xmlElement)
-        }
-        return element
+    var children: [any KMLCodable] {
+        lineStyle
+        polyStyle
     }
 }

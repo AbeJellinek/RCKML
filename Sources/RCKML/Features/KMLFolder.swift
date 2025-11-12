@@ -12,16 +12,23 @@ import Foundation
 /// other KML features, including sub-folders.
 ///
 /// For reference, see [KML Spec](https://developers.google.com/kml/documentation/kmlreference#folder)
-public struct KMLFolder {
+public struct KMLFolder: KMLFeature, KMLContainer {
+    public var id: String?
     public var name: String?
     public var featureDescription: String?
     public var features: [KMLFeature]
 
+    public static var featureType: KMLFeatureType {
+        .folder
+    }
+
     public init(
+        id: String? = nil,
         name: String? = nil,
         featureDescription: String? = nil,
         features: [KMLFeature] = []
     ) {
+        self.id = id
         self.name = name
         self.featureDescription = featureDescription
         self.features = features
@@ -30,34 +37,16 @@ public struct KMLFolder {
 
 // MARK: - KMLObject
 
-extension KMLFolder: KMLObject {
-    public static var kmlTag: String {
-        "Folder"
-    }
-
-    public init(xml: AEXMLElement) throws {
+extension KMLFolder: KMLCodableObject {
+    init(xml: AEXMLElement) throws {
         try Self.verifyXmlTag(xml)
-        name = xml.kmlName
-        featureDescription = xml.kmlFeatureDescription
+        self.id = xml.idAttribute
+        name = xml.valueIfPresent(of: String.self, forKey: .name)
+        featureDescription = xml.valueIfPresent(of: String.self, forKey: .description)
         features = try Self.features(from: xml)
     }
 
-    public var xmlElement: AEXMLElement {
-        let element = AEXMLElement(name: Self.kmlTag)
-        element.kmlName = name
-        element.kmlFeatureDescription = featureDescription
-        for item in features {
-            element.addChild(item.xmlElement)
-        }
-
-        return element
+    var children: [any KMLCodable] {
+        encodableFeatures
     }
 }
-
-// MARK: - KMLFeature
-
-extension KMLFolder: KMLFeature {}
-
-// MARK: - KMLContainer
-
-extension KMLFolder: KMLContainer {}

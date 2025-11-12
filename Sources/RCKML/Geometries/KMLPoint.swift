@@ -11,47 +11,39 @@ import Foundation
 /// A KML geometry associated with a single point on the Earth.
 ///
 /// For reference, see [KML Documentation](https://developers.google.com/kml/documentation/kmlreference#point)
-public struct KMLPoint {
+public struct KMLPoint: KMLGeometry {
+    public var id: String?
     public var coordinate: KMLCoordinate
+
+    public static var geometryType: KMLGeometryType {
+        .point
+    }
 
     public init(coordinate: KMLCoordinate) {
         self.coordinate = coordinate
     }
 
     public init(
+        id: String? = nil,
         latitude: Double,
         longitude: Double,
         altitude: Double? = nil
     ) {
+        self.id = id
         coordinate = KMLCoordinate(latitude: latitude, longitude: longitude, altitude: altitude)
     }
 }
 
-// MARK: KMLElement
+// MARK: KML Codable
 
-extension KMLPoint: KMLObject {
-    public init(xml: AEXMLElement) throws {
+extension KMLPoint: KMLCodableObject {
+    init(xml: AEXMLElement) throws {
         try Self.verifyXmlTag(xml)
-        let coordElement = try xml.requiredKmlChild(ofType: [KMLCoordinate].self)
-        
-        guard let firstCoord = coordElement.first else {
-            throw KMLError.missingRequiredElement(elementName: "coordinates")
-        }
-
-        coordinate = firstCoord
+        self.id = xml.idAttribute
+        self.coordinate = try xml.value(of: KMLCoordinate.self, forKey: .coordinates)
     }
 
-    public var xmlElement: AEXMLElement {
-        let element = AEXMLElement(name: Self.kmlTag)
-        element.addChild([coordinate].xmlElement)
-        return element
-    }
-}
-
-// MARK: KMLGeometry
-
-extension KMLPoint: KMLGeometry {
-    public static var geometryType: KMLGeometryType {
-        .point
+    var children: [any KMLCodable] {
+        KMLValueElement(name: .coordinates, value: coordinate)
     }
 }

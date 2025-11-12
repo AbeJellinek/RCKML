@@ -13,7 +13,8 @@ import Foundation
 /// descriptive information about it.
 ///
 /// For reference, see [KML Spec](https://developers.google.com/kml/documentation/kmlreference#placemark)
-public struct KMLPlacemark {
+public struct KMLPlacemark: KMLFeature {
+    public var id: String?
     public var name: String?
     public var featureDescription: String?
     public var geometry: KMLGeometry
@@ -21,13 +22,19 @@ public struct KMLPlacemark {
     public var styleUrl: KMLStyleUrl?
     public var style: KMLStyle?
 
+    public static var featureType: KMLFeatureType {
+        .placemark
+    }
+
     public init(
+        id: String? = nil,
         name: String,
         featureDescription: String? = nil,
         geometry: KMLGeometry,
         styleUrl: KMLStyleUrl? = nil,
         style: KMLStyle? = nil
     ) {
+        self.id = id
         self.name = name
         self.featureDescription = featureDescription
         self.geometry = geometry
@@ -36,17 +43,14 @@ public struct KMLPlacemark {
     }
 }
 
-// MARK: - KMLObject
+// MARK: - KML Codable
 
-extension KMLPlacemark: KMLObject {
-    public static var kmlTag: String {
-        "Placemark"
-    }
-
-    public init(xml: AEXMLElement) throws {
+extension KMLPlacemark: KMLCodableObject {
+    init(xml: AEXMLElement) throws {
         try Self.verifyXmlTag(xml)
-        self.name = xml.kmlName
-        self.featureDescription = xml.kmlFeatureDescription
+        self.id = xml.idAttribute
+        self.name = xml.valueIfPresent(of: String.self, forKey: .name)
+        self.featureDescription = xml.valueIfPresent(of: String.self, forKey: .description)
 
         guard let childGeometryType = KMLGeometryType
             .allCases
@@ -67,28 +71,14 @@ extension KMLPlacemark: KMLObject {
             self.geometry = childGeometry
         }
 
-        if let style = xml.optionalKmlChild(ofType: KMLStyle.self) {
-            self.style = style
-        } else if let styleUrl = xml.optionalKmlChild(ofType: KMLStyleUrl.self) {
-            self.styleUrl = styleUrl
-        }
+        self.style = xml.children(of: KMLStyle.self).first
+        self.styleUrl = xml.valueIfPresent(of: KMLStyleUrl.self, forKey: .styleUrl)
     }
 
-    public var xmlElement: AEXMLElement {
-        let element = AEXMLElement(name: Self.kmlTag)
-        element.kmlName = name
-        element.kmlFeatureDescription = featureDescription
-        element.addChild(geometry.xmlElement)
-        if let styleUrl {
-            element.addChild(styleUrl.xmlElement)
-        }
-        if let style {
-            element.addChild(style.xmlElement)
-        }
-        return element
+    var children: [any KMLCodable] {
+        geometry as? KMLCodableObject
+        KMLValueElement(name: .styleUrl, value: styleUrl)
+        style
     }
 }
 
-// MARK: - KMLFeature
-
-extension KMLPlacemark: KMLFeature {}

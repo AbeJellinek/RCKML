@@ -20,25 +20,17 @@ public struct KMLStyleUrl: Hashable {
     }
 }
 
-// MARK: - Internal StyleSelector conformance
+// MARK: - KML Codable
 
-extension KMLStyleUrl: KMLStyleSelector {
-    public var id: String? { nil }
-
-    public static var kmlTag: String {
-        "styleUrl"
+extension KMLStyleUrl: KMLValue {
+    var kmlString: String {
+        "#" + styleId
     }
 
-    public init(xml: AEXMLElement) throws {
-        try Self.verifyXmlTag(xml)
-        var urlString = xml.string
-        if urlString.first == "#" {
-            urlString.removeFirst()
+    init(kmlString: String) throws {
+        self.styleId = kmlString
+        if styleId.first == "#" {
+            styleId.removeFirst()
         }
-        self.styleId = urlString
-    }
-
-    public var xmlElement: AEXMLElement {
-        AEXMLElement(name: Self.kmlTag, value: "#" + styleId)
     }
 }

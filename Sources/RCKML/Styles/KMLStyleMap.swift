@@ -16,11 +16,15 @@ import Foundation
 /// not both.
 ///
 /// For definition, see [KML Spec](https://developers.google.com/kml/documentation/kmlreference#stylemap)
-struct KMLStyleMap {
-    var id: String?
-    var styleUrl: KMLStyleUrl?
-    var style: KMLStyle?
+public struct KMLStyleMap: KMLStyleSelector {
+    public var id: String?
+    public var styleUrl: KMLStyleUrl?
+    public var style: KMLStyle?
 //    var highlighted: KMLStyleUrl //ignore highlighted
+
+    public static var kmlTag: String {
+        "StyleMap"
+    }
 
     public init(
         id: String? = nil,
@@ -33,34 +37,25 @@ struct KMLStyleMap {
     }
 }
 
-// MARK: - Internal StyleSelector Protocol Conformance
+// MARK: - KML Codable
 
-extension KMLStyleMap: KMLObject, KMLStyleSelector {
-    static var kmlTag: String {
-        "StyleMap"
-    }
-
+extension KMLStyleMap: KMLCodableObject {
     init(xml: AEXMLElement) throws {
-        // TODO: why is this try optional?
-        try? Self.verifyXmlTag(xml)
-        id = xml.attributes["id"]
-        if let normalPair = xml.children.first(where: { $0["key"].string == "normal" }) {
-            if let styleUrl = normalPair.optionalKmlChild(ofType: KMLStyleUrl.self) {
-                self.styleUrl = styleUrl
-            } else if let style = normalPair.optionalKmlChild(ofType: KMLStyle.self) {
-                self.style = style
-            }
+        try Self.verifyXmlTag(xml)
+        guard let normalPair = xml.children.first(where: { $0["key"].string == "normal" }) else {
+            // TODO: throw?
+            return
         }
+        id = xml.idAttribute
+        style = normalPair.children(of: KMLStyle.self).first
+        styleUrl = normalPair.valueIfPresent(of: KMLStyleUrl.self, forKey: .styleUrl)
     }
 
-    var xmlElement: AEXMLElement {
-        let element = AEXMLElement(baseFor: KMLStyleMap.self, id: id)
+    var children: [any KMLCodable] {
         if let style {
-            element.addChild(style.xmlElement)
+            style
+        } else {
+            KMLValueElement(name: .styleUrl, value: styleUrl)
         }
-        if let styleUrl {
-            element.addChild(styleUrl.xmlElement)
-        }
-        return element
     }
 }

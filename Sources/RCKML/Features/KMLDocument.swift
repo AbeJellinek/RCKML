@@ -18,18 +18,25 @@ import ZIPFoundation
 /// KMLDocuments can be initialized from either raw data, a fileUrl, or a KML string.
 ///
 /// To export a KMLDocument, use the functions `kmlString()` or `kmlData()`
-public struct KMLDocument {
+public struct KMLDocument: KMLObject, KMLContainer {
+    public var id: String?
     public var name: String?
     public var featureDescription: String?
     public var features: [KMLFeature]
     public var styles: [KMLStyleUrl : KMLStyleSelector]
 
+    public static var kmlTag: String {
+        "Document"
+    }
+
     public init(
+        id: String? = nil,
         name: String? = nil,
         featureDescription: String? = nil,
         features: [KMLFeature] = [],
         styles: [KMLStyleUrl : KMLStyleSelector] = [:]
     ) {
+        self.id = id
         self.name = name
         self.featureDescription = featureDescription
         self.features = features
@@ -39,39 +46,25 @@ public struct KMLDocument {
 
 // MARK: - KMLObject
 
-extension KMLDocument: KMLObject {
-    public static var kmlTag: String {
-        "Document"
-    }
-
-    public init(xml: AEXMLElement) throws {
+extension KMLDocument: KMLCodableObject {
+    init(xml: AEXMLElement) throws {
         try Self.verifyXmlTag(xml)
+        self.id = xml.idAttribute
         self.features = try Self.features(from: xml)
-        self.name = xml.kmlName
+        self.name = xml.valueIfPresent(of: String.self, forKey: .name)
         self.styles = try Self.kmlStylesInElement(xml)
-        self.featureDescription = xml.kmlFeatureDescription
+        self.featureDescription = xml.valueIfPresent(of: String.self, forKey: .description)
     }
 
-    public var xmlElement: AEXMLElement {
-        let element = AEXMLElement(name: Self.kmlTag)
-        element.kmlName = name
-        element.kmlFeatureDescription = featureDescription
+    var children: [any KMLCodable] {
+        KMLValueElement(name: .name, value: name)
+        KMLValueElement(name: .description, value: featureDescription)
 
-        for (_, style) in styles {
-            element.addChild(style.xmlElement)
-        }
+        styles.compactMap { $0.value.encodable }
 
-        for item in features {
-            element.addChild(item.xmlElement)
-        }
-
-        return element
+        encodableFeatures
     }
 }
-
-// MARK: - KMLContainer
-
-extension KMLDocument: KMLContainer {}
 
 // MARK: - Accessors
 
@@ -147,9 +140,6 @@ public extension KMLDocument {
         let xmlDoc = try AEXMLDocument(xml: data)
         guard let documentElement = xmlDoc.firstDescendant(where: { $0.name == Self.kmlTag }) else {
             throw KMLError.missingRequiredElement(elementName: "Document")
-        }
-        if let kmlError = documentElement.error {
-            throw kmlError
         }
         try self.init(xml: documentElement)
     }

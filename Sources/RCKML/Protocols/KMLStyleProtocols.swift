@@ -18,6 +18,19 @@ public protocol KMLStyleSelector: KMLObject {
     var id: String? { get }
 }
 
+enum KMLStyleSelectorType: String, CaseIterable {
+    case styleMap = "StyleMap"
+    case style = "Style"
+}
+
+typealias KMLCodableStyleSelector = (KMLStyleSelector & KMLCodableObject)
+
+extension KMLStyleSelector {
+    var encodable: KMLCodableStyleSelector? {
+        self as? KMLCodableStyleSelector
+    }
+}
+
 /// Protocol for conforming to the abstract KML element *ColorStyle*,
 /// which is the base type for *LineStyle*, *PolyStyle*, *IconStyle*, and *LabelStyle*
 ///

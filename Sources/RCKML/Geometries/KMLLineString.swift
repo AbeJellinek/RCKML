@@ -12,33 +12,32 @@ import Foundation
 /// a line on the map.
 ///
 /// For reference, see [KML Documentation](https://developers.google.com/kml/documentation/kmlreference#linestring)
-public struct KMLLineString {
+public struct KMLLineString: KMLGeometry {
+    public var id: String?
     public var coordinates: [KMLCoordinate]
 
-    public init(coordinates: [KMLCoordinate]) {
+    public init(
+        id: String? = nil,
+        coordinates: [KMLCoordinate]
+    ) {
+        self.id = id
         self.coordinates = coordinates
     }
-}
 
-// MARK: KMLElement
-
-extension KMLLineString: KMLObject {
-    public init(xml: AEXMLElement) throws {
-        try Self.verifyXmlTag(xml)
-        coordinates = try xml.requiredKmlChild(ofType: [KMLCoordinate].self)
-    }
-
-    public var xmlElement: AEXMLElement {
-        let element = AEXMLElement(name: Self.kmlTag)
-        element.addChild(coordinates.xmlElement)
-        return element
-    }
-}
-
-// MARK: KMLGeometry
-
-extension KMLLineString: KMLGeometry {
     public static var geometryType: KMLGeometryType {
         .lineString
+    }
+}
+
+// MARK: KML Codable
+
+extension KMLLineString: KMLCodableObject {
+    init(xml: AEXMLElement) throws {
+        try Self.verifyXmlTag(xml)
+        coordinates = try xml.value(of: [KMLCoordinate].self, forKey: .coordinates)
+    }
+
+    var children: [any KMLCodable] {
+        KMLValueElement(name: .coordinates, value: coordinates)
     }
 }

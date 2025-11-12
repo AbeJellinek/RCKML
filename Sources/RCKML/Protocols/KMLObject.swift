@@ -20,35 +20,7 @@ public protocol KMLObject {
     /// The XML element name for this type of KML Object, such as
     /// **Folder**, **Document**, **Geometry**, **Style**, etc.
     static var kmlTag: String { get }
-
-    /// Initializes the KMLObject using an AEXMLElement read from a KML file.
-    /// - Parameter xml: xml element read from a valid KML file.
-    init(xml: AEXMLElement) throws
-
-    /// A representation of the KML element as AEXMLElement, for writing to KML file.
-    var xmlElement: AEXMLElement { get }
-}
-
-//protocol _KMLObject {
-//    static var kmlTag: String { get }
-//
-//    var id: String? { get }
-//    var values: [KMLValueTag : any KMLValue] { get }
-//    var children: [any _KMLObject] { get }
-//}
-
-// MARK: Initializer Helpers
-
-internal extension KMLObject {
-    /// Call this function at the beginning of any `KMLObject.init(xml:)` to
-    /// ensure that the xml tag being used to create the object is of the correct
-    /// type
-    ///
-    /// - Parameter xml: the xml element being used to check against.
-    /// - Throws: If the xml tag name is different from Self.kmlTag, throws a xmlTagMismatch error.
-    static func verifyXmlTag(_ xml: AEXMLElement) throws {
-        guard xml.name == kmlTag else {
-            throw KMLError.xmlTagMismatch
-        }
-    }
+    
+    /// <#Description#>
+    var id: String? { get }
 }

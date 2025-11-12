@@ -34,7 +34,7 @@ public enum KMLGeometryType: String, CaseIterable {
     case multiGeometry = "MultiGeometry"
 
     /// The RCKML type that corresponds to this KML Geometry class.
-    var concreteType: KMLGeometry.Type {
+    var concreteType: (KMLGeometry & KMLCodableObject).Type {
         switch self {
         case .lineString:
             KMLLineString.self
