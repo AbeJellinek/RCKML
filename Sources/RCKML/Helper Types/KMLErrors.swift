@@ -7,7 +7,7 @@
 
 import Foundation
 
-public enum KMLError: Error {
+enum KMLError: Error {
     case xmlTagMismatch
     case coordinateParseFailed
     case missingRequiredElement(elementName: String)

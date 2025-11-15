@@ -25,11 +25,6 @@ extension AEXMLElement {
 
     // MARK: Decoder Functions
     
-    /// <#Description#>
-    /// - Parameters:
-    ///   - type: <#type description#>
-    ///   - key: <#key description#>
-    /// - Returns: <#description#>
     func value<K: KMLValue>(of type: K.Type, forKey key: KMLTagName) throws -> K {
         let item = self[key.name]
         if let error = item.error {
