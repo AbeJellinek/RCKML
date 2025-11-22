@@ -41,18 +41,20 @@ private extension KMLTagName {
     static let isOutlined = KMLTagName("outline")
 }
 
-extension KMLPolyStyle: KMLCodableObject {
-    init(xml: AEXMLElement) throws {
-        try Self.verifyXmlTag(xml)
-        id = xml.idAttribute
-        color = try xml.value(of: KMLColor.self, forKey: .color)
-        isFilled = xml.valueIfPresent(of: Bool.self, forKey: .isFilled) ?? false
-        isOutlined = xml.valueIfPresent(of: Bool.self, forKey: .isOutlined) ?? true
+extension KMLPolyStyle: KMLDecodable {
+    init(from decoder: KMLDecoder) throws {
+        try decoder.verifyMatchesType(Self.self)
+        id = decoder.idAttribute
+        color = try decoder.value(of: KMLColor.self, forKey: .color)
+        isFilled = decoder.value(of: Bool.self, forKey: .isFilled, default: false)
+        isOutlined = decoder.value(of: Bool.self, forKey: .isOutlined, default: true)
     }
+}
 
-    var children: [any KMLCodable] {
-        KMLValueElement(name: .color, value: color)
-        KMLValueElement(name: .isFilled, value: isFilled)
-        KMLValueElement(name: .isOutlined, value: isOutlined)
+extension KMLPolyStyle: KMLEncodable {
+    func encode(to encoder: KMLEncoder) throws {
+        try encoder.encode(tag: .color, value: color)
+        try encoder.encode(tag: .isFilled, value: isFilled)
+        try encoder.encode(tag: .isOutlined, value: isOutlined)
     }
 }

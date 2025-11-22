@@ -47,6 +47,8 @@ extension KMLCoordinate: CustomStringConvertible {
     }
 }
 
+struct CoordinateParseError: Error {}
+
 // MARK: - KMLValue
 
 extension KMLCoordinate: KMLValue {
@@ -58,7 +60,7 @@ extension KMLCoordinate: KMLValue {
         let components = kmlString.components(separatedBy: ",")
 
         guard components.count >= 2 else {
-            throw KMLError.coordinateParseFailed
+            throw CoordinateParseError()
         }
 
         longitude = Double(components[0])!
@@ -83,7 +85,7 @@ extension Array: KMLValue where Element == KMLCoordinate {
         }
 
         if coords.isEmpty {
-            throw KMLError.coordinateParseFailed
+            throw CoordinateParseError()
         }
         self = coords
     }

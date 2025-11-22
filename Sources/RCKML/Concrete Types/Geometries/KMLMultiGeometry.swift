@@ -30,21 +30,21 @@ public struct KMLMultiGeometry: KMLGeometry {
 
 // MARK: KML Codable
 
-extension KMLMultiGeometry: KMLCodableObject {
-    init(xml: AEXMLElement) throws {
-        try Self.verifyXmlTag(xml)
-        geometries = try xml.children.compactMap { xmlChild -> KMLGeometry? in
-            guard let type = KMLGeometryType(rawValue: xmlChild.name) else {
-                return nil
-            }
-            let object = try type.concreteType.init(xml: xmlChild)
-            return object
+extension KMLMultiGeometry: KMLEncodable {
+    func encode(to encoder: KMLEncoder) throws {
+        for geometry in geometries {
+            let encodableGeometry = try SomeKMLGeometry(geometry)
+            try encoder.encodeChild(encodableGeometry)
         }
     }
+}
 
-    var children: [any KMLCodable] {
-        for aGeometry in geometries {
-            aGeometry as? KMLCodableObject
-        }
+extension KMLMultiGeometry: KMLDecodable {
+    init(from decoder: KMLDecoder) throws {
+        try decoder.verifyMatchesType(Self.self)
+        id = decoder.idAttribute
+
+        let subGeometries = try decoder.allChildren(of: SomeKMLGeometry.self)
+        self.geometries = subGeometries.map(\.wrapped)
     }
 }

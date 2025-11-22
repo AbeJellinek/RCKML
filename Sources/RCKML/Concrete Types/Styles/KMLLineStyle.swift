@@ -33,16 +33,18 @@ public struct KMLLineStyle: KMLColorStyle {
 
 // MARK: - KML Codable
 
-extension KMLLineStyle: KMLCodableObject {
-    init(xml: AEXML.AEXMLElement) throws {
-        try Self.verifyXmlTag(xml)
-        id = xml.idAttribute
-        width = xml.valueIfPresent(of: Double.self, forKey: .width) ?? 1.0
-        color = try xml.value(of: KMLColor.self, forKey: .color)
+extension KMLLineStyle: KMLEncodable {
+    func encode(to encoder: KMLEncoder) throws {
+        try encoder.encode(tag: .width, value: width)
+        try encoder.encode(tag: .color, value: color)
     }
+}
 
-    var children: [any KMLCodable] {
-        KMLValueElement(name: .width, value: width)
-        KMLValueElement(name: .color, value: color)
+extension KMLLineStyle: KMLDecodable {
+    init(from decoder: KMLDecoder) throws {
+        try decoder.verifyMatchesType(Self.self)
+        id = decoder.idAttribute
+        width = decoder.value(of: Double.self, forKey: .width, default: 1.0)
+        color = try decoder.value(of: KMLColor.self, forKey: .color)
     }
 }

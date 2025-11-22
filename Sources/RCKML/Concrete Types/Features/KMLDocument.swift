@@ -22,8 +22,11 @@ public struct KMLDocument: KMLObject, KMLContainer {
     public var id: String?
     public var name: String?
     public var featureDescription: String?
-    public var features: [KMLFeature]
-    public var styles: [KMLStyleUrl : KMLStyleSelector]
+    public var features: [SomeKMLFeature]
+
+//    public var styles: [KMLStyleUrl : KMLStyleSelector]
+    public var styles: [SomeKMLStyleSelector]
+
 
     public static var kmlTag: String {
         "Document"
@@ -33,8 +36,8 @@ public struct KMLDocument: KMLObject, KMLContainer {
         id: String? = nil,
         name: String? = nil,
         featureDescription: String? = nil,
-        features: [KMLFeature] = [],
-        styles: [KMLStyleUrl : KMLStyleSelector] = [:]
+        features: [SomeKMLFeature] = [],
+        styles: [SomeKMLStyleSelector] = []
     ) {
         self.id = id
         self.name = name
@@ -44,26 +47,14 @@ public struct KMLDocument: KMLObject, KMLContainer {
     }
 }
 
-// MARK: - KMLObject
+// MARK: - Errors
 
-extension KMLDocument: KMLCodableObject {
-    init(xml: AEXMLElement) throws {
-        try Self.verifyXmlTag(xml)
-        self.id = xml.idAttribute
-        self.features = try Self.features(from: xml)
-        self.name = xml.valueIfPresent(of: String.self, forKey: .name)
-        self.styles = try Self.kmlStylesInElement(xml)
-        self.featureDescription = xml.valueIfPresent(of: String.self, forKey: .description)
-    }
-
-    var children: [any KMLCodable] {
-        KMLValueElement(name: .name, value: name)
-        KMLValueElement(name: .description, value: featureDescription)
-
-        styles.compactMap { $0.value.encodable }
-
-        encodableFeatures
-    }
+enum KMLDocumentError: Error {
+    case failedStringConversion
+    case kmzReadError
+    case kmzWriteError
+    case missingDocumentRoot
+    case unknownFileExtension(String)
 }
 
 // MARK: - Accessors
@@ -74,20 +65,17 @@ public extension KMLDocument {
         let xmlDoc = AEXMLDocument()
         let baseAttributes = ["xmlns" : "http://www.opengis.net/kml/2.2"]
         let kmlRoot = xmlDoc.addChild(name: "kml", attributes: baseAttributes)
-        kmlRoot.addChild(xmlElement)
-        if let xmlError = xmlDoc.error {
-            throw xmlError
-        }
-        if let kmlError = kmlRoot.error {
-            throw kmlError
-        }
+
+        let encoder = KMLEncoder(kmlRoot)
+        try encoder.encodeChild(self)
+
         return xmlDoc.xml
     }
 
     /// Returns the file data representation of the KML file.
     func kmlData() throws -> Data {
         guard let result = try kmlString().data(using: .utf8) else {
-            throw KMLError.couldntConvertStringData
+            throw KMLDocumentError.failedStringConversion
         }
         return result
     }
@@ -109,7 +97,7 @@ public extension KMLDocument {
             })
 
         guard let result = archive.data else {
-            throw KMLError.kmzWriteError
+            throw KMLDocumentError.kmzWriteError
         }
         return result
     }
@@ -117,19 +105,20 @@ public extension KMLDocument {
     /// Given a KMLStyleUrl reference from a feature contained in this document,
     /// returns the global style that is referenced by the url.
     func getStyleFromUrl(_ styleUrl: KMLStyleUrl) -> KMLStyle? {
-        guard let aSelector = styles[styleUrl] else {
+        guard let aSelector = styles.first(where: { $0.wrapped.id == styleUrl.styleId }) else {
             return nil
         }
-        if let aStyle = aSelector as? KMLStyle {
-            return aStyle
-        } else if let aMap = aSelector as? KMLStyleMap {
-            if let mappedStyle = aMap.style {
-                return mappedStyle
-            } else if let mappedUrl = aMap.styleUrl {
-                return getStyleFromUrl(mappedUrl)
+        switch aSelector {
+        case .styleMap(let styleMap):
+            switch styleMap.content {
+            case .styleUrl(let styleUrl):
+                return getStyleFromUrl(styleUrl)
+            case .style(let mapStyle):
+                return mapStyle
             }
+        case .style(let style):
+            return style
         }
-        return nil
     }
 }
 
@@ -139,9 +128,10 @@ public extension KMLDocument {
     init(_ data: Data) throws {
         let xmlDoc = try AEXMLDocument(xml: data)
         guard let documentElement = xmlDoc.firstDescendant(where: { $0.name == Self.kmlTag }) else {
-            throw KMLError.missingRequiredElement(elementName: "Document")
+            throw KMLDocumentError.missingDocumentRoot
         }
-        try self.init(xml: documentElement)
+        let decoder = KMLDecoder(documentElement)
+        try self.init(from: decoder)
     }
 
     init(kmzData: Data) throws {
@@ -152,7 +142,7 @@ public extension KMLDocument {
               let _ = try? archive.extract(kmlEntry, consumer: { extractedData += $0 }),
               !extractedData.isEmpty
         else {
-            throw KMLError.kmzReadError
+            throw KMLDocumentError.kmzReadError
         }
 
         try self.init(extractedData)
@@ -160,7 +150,7 @@ public extension KMLDocument {
 
     init(_ kmlString: String) throws {
         guard let data = kmlString.data(using: .utf8) else {
-            throw KMLError.missingRequiredElement(elementName: "xml")
+            throw KMLDocumentError.failedStringConversion
         }
         try self.init(data)
     }
@@ -176,10 +166,11 @@ public extension KMLDocument {
         case "kmz":
             try self.init(kmzData: data)
         default:
-            throw KMLError.unknownFileExtension(extension: url.pathExtension)
+            throw KMLDocumentError.unknownFileExtension(url.pathExtension)
         }
     }
 
+    /*
     /// Given the root XML element of a KML file, this returns the `styles`
     /// property for the KMLDocument.
     private static func kmlStylesInElement(_ xmlElement: AEXMLElement) throws -> [KMLStyleUrl: KMLStyleSelector] {
@@ -200,6 +191,34 @@ public extension KMLDocument {
                     dict[styleUrl] = style
                 }
             }
+        }
+    }
+     */
+}
+
+// MARK: - KMLCodable
+
+extension KMLDocument: KMLDecodable {
+    init(from decoder: KMLDecoder) throws {
+        try decoder.verifyMatchesType(Self.self)
+        id = decoder.idAttribute
+        name = try? decoder.value(of: String.self, forKey: .name)
+        featureDescription = try? decoder.value(of: String.self, forKey: .description)
+
+        features = try decoder.allChildren(of: SomeKMLFeature.self)
+        styles = try decoder.allChildren(of: SomeKMLStyleSelector.self)
+    }
+}
+
+extension KMLDocument: KMLEncodable {
+    func encode(to encoder: KMLEncoder) throws {
+        try encoder.encode(tag: .name, value: name)
+        try encoder.encode(tag: .description, value: featureDescription)
+        for feature in features {
+            try encoder.encodeChild(feature)
+        }
+        for styleSelector in styles {
+            try encoder.encodeChild(styleSelector)
         }
     }
 }

@@ -42,17 +42,18 @@ public struct KMLStyle: KMLStyleSelector {
 
 // MARK: - KML Codable
 
-extension KMLStyle: KMLCodableObject {
-    init(xml: AEXMLElement) throws {
-        try Self.verifyXmlTag(xml)
-        id = xml.idAttribute
-
-        lineStyle = xml.children(of: KMLLineStyle.self).first
-        polyStyle = xml.children(of: KMLPolyStyle.self).first
+extension KMLStyle: KMLEncodable {
+    func encode(to encoder: KMLEncoder) throws {
+        try encoder.encodeChild(lineStyle)
+        try encoder.encodeChild(polyStyle)
     }
+}
 
-    var children: [any KMLCodable] {
-        lineStyle
-        polyStyle
+extension KMLStyle: KMLDecodable {
+    init(from decoder: KMLDecoder) throws {
+        try decoder.verifyMatchesType(Self.self)
+        id = decoder.idAttribute
+        lineStyle = try? decoder.child(of: KMLLineStyle.self)
+        polyStyle = try? decoder.child(of: KMLPolyStyle.self)
     }
 }

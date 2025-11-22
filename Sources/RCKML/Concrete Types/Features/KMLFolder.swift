@@ -16,7 +16,7 @@ public struct KMLFolder: KMLFeature, KMLContainer {
     public var id: String?
     public var name: String?
     public var featureDescription: String?
-    public var features: [KMLFeature]
+    public var features: [SomeKMLFeature]
 
     public static var featureType: KMLFeatureType {
         .folder
@@ -26,7 +26,7 @@ public struct KMLFolder: KMLFeature, KMLContainer {
         id: String? = nil,
         name: String? = nil,
         featureDescription: String? = nil,
-        features: [KMLFeature] = []
+        features: [SomeKMLFeature] = []
     ) {
         self.id = id
         self.name = name
@@ -35,18 +35,24 @@ public struct KMLFolder: KMLFeature, KMLContainer {
     }
 }
 
-// MARK: - KMLObject
+// MARK: - KML Coding
 
-extension KMLFolder: KMLCodableObject {
-    init(xml: AEXMLElement) throws {
-        try Self.verifyXmlTag(xml)
-        self.id = xml.idAttribute
-        name = xml.valueIfPresent(of: String.self, forKey: .name)
-        featureDescription = xml.valueIfPresent(of: String.self, forKey: .description)
-        features = try Self.features(from: xml)
+extension KMLFolder: KMLEncodable {
+    func encode(to encoder: KMLEncoder) throws {
+        try encoder.encode(tag: .name, value: name)
+        try encoder.encode(tag: .description, value: featureDescription)
+        for feature in features {
+            try encoder.encodeChild(feature)
+        }
     }
+}
 
-    var children: [any KMLCodable] {
-        encodableFeatures
+extension KMLFolder: KMLDecodable {
+    init(from decoder: KMLDecoder) throws {
+        try decoder.verifyMatchesType(Self.self)
+        id = decoder.idAttribute
+        name = try decoder.value(of: String.self, forKey: .name)
+        featureDescription = try decoder.value(of: String.self, forKey: .description)
+        features = try decoder.allChildren(of: SomeKMLFeature.self)
     }
 }

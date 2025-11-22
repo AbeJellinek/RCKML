@@ -31,13 +31,16 @@ public struct KMLLineString: KMLGeometry {
 
 // MARK: KML Codable
 
-extension KMLLineString: KMLCodableObject {
-    init(xml: AEXMLElement) throws {
-        try Self.verifyXmlTag(xml)
-        coordinates = try xml.value(of: [KMLCoordinate].self, forKey: .coordinates)
+extension KMLLineString: KMLDecodable {
+    init(from decoder: KMLDecoder) throws {
+        try decoder.verifyMatchesType(Self.self)
+        id = decoder.idAttribute
+        coordinates = try decoder.value(of: [KMLCoordinate].self, forKey: .coordinates)
     }
+}
 
-    var children: [any KMLCodable] {
-        KMLValueElement(name: .coordinates, value: coordinates)
+extension KMLLineString: KMLEncodable {
+    func encode(to encoder: KMLEncoder) throws {
+        try encoder.encode(tag: .coordinates, value: coordinates)
     }
 }

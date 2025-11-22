@@ -21,6 +21,11 @@ import AppKit
 import SwiftUI
 #endif
 
+enum ColorError: Error {
+    case stringLength(String)
+    case scannerFailure(String)
+}
+
 /// A struct representing the RGBa color value of a KML object's *color* tag.
 ///
 /// For a brief discussion of KML's hex color coding, see [ColorStyle](https://developers.google.com/kml/documentation/kmlreference#colorstyle) reference.
@@ -139,13 +144,4 @@ public extension KMLColor {
             .opacity(alpha)
     }
     #endif
-}
-
-// MARK: - Internal Initializers
-
-internal extension KMLColor {
-    enum ColorError: Error {
-        case stringLength(String)
-        case scannerFailure(String)
-    }
 }

@@ -36,14 +36,16 @@ public struct KMLPoint: KMLGeometry {
 
 // MARK: KML Codable
 
-extension KMLPoint: KMLCodableObject {
-    init(xml: AEXMLElement) throws {
-        try Self.verifyXmlTag(xml)
-        self.id = xml.idAttribute
-        self.coordinate = try xml.value(of: KMLCoordinate.self, forKey: .coordinates)
+extension KMLPoint: KMLDecodable {
+    init(from decoder: KMLDecoder) throws {
+        try decoder.verifyMatchesType(Self.self)
+        id = decoder.idAttribute
+        coordinate = try decoder.value(of: KMLCoordinate.self, forKey: .coordinates)
     }
+}
 
-    var children: [any KMLCodable] {
-        KMLValueElement(name: .coordinates, value: coordinate)
+extension KMLPoint: KMLEncodable {
+    func encode(to encoder: KMLEncoder) throws {
+        try encoder.encode(tag: .coordinates, value: coordinate)
     }
 }
