@@ -9,21 +9,14 @@ import AEXML
 import Foundation
 import ZIPFoundation
 
-/// A root object for reading KML from file, or writing to file.
+/// A root object for reading KML from a file, or writing to file.
 ///
-/// At its base, the KMLDocument is an array of KMLFeatures, and a dictionary
-/// of `[StyleUrl : StyleSelector]` which are used as global styles for the
-/// features in the file.
-///
-/// KMLDocuments can be initialized from either raw data, a fileUrl, or a KML string.
-///
-/// To export a KMLDocument, use the functions `kmlString()` or `kmlData()`
+/// /// For reference, see [KML Spec](https://developers.google.com/kml/documentation/kmlreference#document)
 public struct KMLDocument: KMLObject, KMLContainer {
     public var id: String?
     public var name: String?
     public var featureDescription: String?
     public var features: [AnyKMLFeature]
-
     public var styles: [AnyKMLStyleSelector]
 
     public static var kmlTag: String {
@@ -155,9 +148,8 @@ extension KMLDocument: KMLDecodable {
         try self.init(data)
     }
 
-    /// Initializes a KMLDocument from a fileUrl, which must have a
-    /// path extension of either "KML" or "KMZ" (neither are case-sensitive).
-    /// - Throws: KML reading errors.
+    /// Initializes a KMLDocument from a fileUrl, which must have a path extension of either "KML" or
+    /// "KMZ" (neither are case-sensitive).
     public init(_ url: URL) throws {
         let data = try Data(contentsOf: url)
         switch url.pathExtension.lowercased() {

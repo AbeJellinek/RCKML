@@ -8,12 +8,10 @@
 import AEXML
 import Foundation
 
-/// A wrapper around possible KML style types used to determine
-/// drawing behavior for an object, referenced either inside a
-/// KMLFeature, or from a KMLStyleMap by its id.
+/// A wrapper around possible KML style types used to determine drawing behavior for an object, referenced
+/// either inside a KMLFeature, or from a KMLStyleMap by its id.
 ///
-/// A KMLStyle can contain up to one of each type of KMLColorStyle,
-/// plus ListStyle.
+/// A KMLStyle can contain up to one of each type of KMLColorStyle, plus ListStyle.
 ///
 /// For definition, see [KML Spec](https://developers.google.com/kml/documentation/kmlreference#style)
 public struct KMLStyle: KMLStyleSelector {

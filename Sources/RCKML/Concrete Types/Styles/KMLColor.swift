@@ -21,11 +21,6 @@ import AppKit
 import SwiftUI
 #endif
 
-enum ColorError: Error {
-    case stringLength(String)
-    case scannerFailure(String)
-}
-
 /// A struct representing the RGBa color value of a KML object's *color* tag.
 ///
 /// For a brief discussion of KML's hex color coding, see [ColorStyle](https://developers.google.com/kml/documentation/kmlreference#colorstyle) reference.
@@ -55,49 +50,19 @@ public struct KMLColor {
     }
 }
 
-// MARK: - KML Codable
-
-extension KMLColor: KMLValue {
-    var kmlString: String {
-        String(
-            format: "%02lX%02lX%02lX%02lX",
-            lroundf(Float(alpha) * 255),
-            lroundf(Float(blue) * 255),
-            lroundf(Float(green) * 255),
-            lroundf(Float(red) * 255)
-        )
-    }
-
-    init(kmlString: String) throws {
-        let formattedString = kmlString
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-            .uppercased()
-        let scanner = Scanner(string: formattedString)
-        var hexNumber: UInt64 = 0
-        let stringLength = formattedString.count
-
-        guard stringLength == 8 else {
-            throw ColorError.stringLength(formattedString)
-        }
-        guard scanner.scanHexInt64(&hexNumber) else {
-            throw ColorError.scannerFailure(formattedString)
-        }
-
-        alpha = Double((hexNumber & 0xFF000000) >> 24) / 255.0
-        blue = Double((hexNumber & 0x00FF0000) >> 16) / 255.0
-        green = Double((hexNumber & 0x0000FF00) >> 8) / 255.0
-        red = Double(hexNumber & 0x000000FF) / 255.0
-    }
-}
-
-// MARK: - Public Getters
+// MARK: - Conversions
 
 public extension KMLColor {
     var cgColor: CGColor {
-        CGColor(red: CGFloat(red), green: CGFloat(green), blue: CGFloat(blue), alpha: CGFloat(alpha))
+        CGColor(
+            red: CGFloat(red),
+            green: CGFloat(green),
+            blue: CGFloat(blue),
+            alpha: CGFloat(alpha)
+        )
     }
 
-    #if canImport(UIKit)
+#if canImport(UIKit)
     var uiColor: UIColor {
         UIColor(
             red: CGFloat(red),
@@ -118,9 +83,9 @@ public extension KMLColor {
         self.blue = Double(blue)
         self.alpha = Double(alpha)
     }
-    #endif
+#endif
 
-    #if canImport(AppKit)
+#if canImport(AppKit)
     var nsColor: NSColor {
         NSColor(
             red: CGFloat(red),
@@ -136,12 +101,52 @@ public extension KMLColor {
         blue = Double(nsColor.blueComponent)
         alpha = Double(nsColor.alphaComponent)
     }
-    #endif
+#endif
 
-    #if canImport(SwiftUI)
+#if canImport(SwiftUI)
     var color: Color {
         Color(red: red, green: green, blue: blue)
             .opacity(alpha)
     }
-    #endif
+#endif
+}
+
+// MARK: - KML Value Codable
+
+extension KMLColor: KMLValue {
+    enum Errors: Error {
+        case stringLength(String)
+        case scannerFailure(String)
+    }
+
+    var kmlString: String {
+        String(
+            format: "%02lX%02lX%02lX%02lX",
+            lroundf(Float(alpha) * 255),
+            lroundf(Float(blue) * 255),
+            lroundf(Float(green) * 255),
+            lroundf(Float(red) * 255)
+        )
+    }
+
+    init(kmlString: String) throws {
+        let formattedString = kmlString
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .uppercased()
+        let scanner = Scanner(string: formattedString)
+        var hexNumber: UInt64 = 0
+        let stringLength = formattedString.count
+
+        guard stringLength == 8 else {
+            throw Errors.stringLength(formattedString)
+        }
+        guard scanner.scanHexInt64(&hexNumber) else {
+            throw Errors.scannerFailure(formattedString)
+        }
+
+        alpha = Double((hexNumber & 0xFF000000) >> 24) / 255.0
+        blue = Double((hexNumber & 0x00FF0000) >> 16) / 255.0
+        green = Double((hexNumber & 0x0000FF00) >> 8) / 255.0
+        red = Double(hexNumber & 0x000000FF) / 255.0
+    }
 }

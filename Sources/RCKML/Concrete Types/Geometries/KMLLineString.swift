@@ -8,8 +8,7 @@
 import AEXML
 import Foundation
 
-/// A series of KMLCoordinates connected in order to form
-/// a line on the map.
+/// A series of KMLCoordinates connected in order to form  a line on the map.
 ///
 /// For reference, see [KML Documentation](https://developers.google.com/kml/documentation/kmlreference#linestring)
 public struct KMLLineString: KMLGeometry {

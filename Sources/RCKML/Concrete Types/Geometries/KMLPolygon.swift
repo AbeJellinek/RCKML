@@ -8,8 +8,7 @@
 import AEXML
 import Foundation
 
-/// A geometry representing an enclosed region, possibly including
-/// inner boundaries as well.
+/// A geometry representing an enclosed region, possibly including inner cut-out boundaries as well.
 ///
 /// For reference, see [KML Documentation](https://developers.google.com/kml/documentation/kmlreference#polygon)
 public struct KMLPolygon: KMLGeometry {
@@ -18,8 +17,7 @@ public struct KMLPolygon: KMLGeometry {
     /// The outer boundary of the polygon.
     public var outerBoundaryIs: LinearRing
 
-    /// An optional array of internal boundaries inside the
-    /// polygon, which represent holes in the polygon.
+    /// An optional array of internal boundaries inside the polygon, which represent holes in the polygon.
     public var innerBoundaryIs: [LinearRing]?
 
     public static var geometryType: KMLGeometryType {
@@ -37,9 +35,33 @@ public struct KMLPolygon: KMLGeometry {
     }
 }
 
-// MARK: KMLElement
+// MARK: - Linear Ring
 
-fileprivate extension KMLTagName {
+extension KMLPolygon {
+    /// A closed version of LineString, where the first and last points connect, forming an enclosed area.
+    ///
+    /// For reference, see [KML Documentation](https://developers.google.com/kml/documentation/kmlreference#linearring)
+    public struct LinearRing: KMLObject {
+        public var id: String?
+        public var coordinates: [KMLCoordinate]
+
+        public static var kmlTag: String {
+            "LinearRing"
+        }
+
+        public init(
+            id: String? = nil,
+            coordinates: [KMLCoordinate]
+        ) {
+            self.id = id
+            self.coordinates = coordinates
+        }
+    }
+}
+
+// MARK: - KML Codable - Polygon
+
+private extension KMLTagName {
     static var outerBoundaryIs: Self { KMLTagName("outerBoundaryIs") }
     static var innerBoundaryIs: Self { KMLTagName("innerBoundaryIs") }
 }
@@ -75,32 +97,7 @@ extension KMLPolygon: KMLEncodable {
     }
 }
 
-// MARK: - Linear Ring
-
-extension KMLPolygon {
-    /// A closed version of LineString, where the first
-    /// and last points connect, forming an enclosed area.
-    ///
-    /// For reference, see [KML Documentation](https://developers.google.com/kml/documentation/kmlreference#linearring)
-    public struct LinearRing: KMLObject {
-        public var id: String?
-        public var coordinates: [KMLCoordinate]
-
-        public static var kmlTag: String {
-            "LinearRing"
-        }
-
-        public init(
-            id: String? = nil,
-            coordinates: [KMLCoordinate]
-        ) {
-            self.id = id
-            self.coordinates = coordinates
-        }
-    }
-}
-
-// MARK: KML Codable
+// MARK: - KML Codable - LinearRing
 
 extension KMLPolygon.LinearRing: KMLDecodable {
     init(from container: KMLDecoder) throws {

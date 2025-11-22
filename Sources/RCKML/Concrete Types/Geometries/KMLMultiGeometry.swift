@@ -13,7 +13,7 @@ import Foundation
 /// For reference, see [KML Documentation](https://developers.google.com/kml/documentation/kmlreference#multigeometry)
 public struct KMLMultiGeometry: KMLGeometry {
     public var id: String?
-    public var geometries: [KMLGeometry]
+    public var geometries: [AnyKMLGeometry]
 
     public static var geometryType: KMLGeometryType {
         .multiGeometry
@@ -21,7 +21,7 @@ public struct KMLMultiGeometry: KMLGeometry {
 
     public init(
         id: String? = nil,
-        geometries: [KMLGeometry]
+        geometries: [AnyKMLGeometry]
     ) {
         self.id = id
         self.geometries = geometries
@@ -33,8 +33,7 @@ public struct KMLMultiGeometry: KMLGeometry {
 extension KMLMultiGeometry: KMLEncodable {
     func encode(to encoder: KMLEncoder) throws {
         for geometry in geometries {
-            let encodableGeometry = try AnyKMLGeometry(geometry)
-            try encoder.encodeChild(encodableGeometry)
+            try encoder.encodeChild(geometry)
         }
     }
 }
@@ -43,8 +42,6 @@ extension KMLMultiGeometry: KMLDecodable {
     init(from decoder: KMLDecoder) throws {
         try decoder.verifyMatchesType(Self.self)
         id = decoder.idAttribute
-
-        let subGeometries = try decoder.allChildren(of: AnyKMLGeometry.self)
-        self.geometries = subGeometries.map(\.wrapped)
+        self.geometries = try decoder.allChildren(of: AnyKMLGeometry.self)
     }
 }

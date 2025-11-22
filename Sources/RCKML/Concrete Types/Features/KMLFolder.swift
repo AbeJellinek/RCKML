@@ -8,8 +8,7 @@
 import AEXML
 import Foundation
 
-/// A feature to be included in KML files, which can contain any number of
-/// other KML features, including sub-folders.
+/// A feature to be included in KML files, which can contain any number of  other KML features, including sub-folders.
 ///
 /// For reference, see [KML Spec](https://developers.google.com/kml/documentation/kmlreference#folder)
 public struct KMLFolder: KMLFeature, KMLContainer {

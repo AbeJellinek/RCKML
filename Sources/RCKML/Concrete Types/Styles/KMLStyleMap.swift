@@ -8,18 +8,15 @@
 import AEXML
 import Foundation
 
-/// A wrapper around one or two KMLStyles to provide a standard and
-/// a highlighted version for a given Feature.
+/// A wrapper around one or two KMLStyles to provide a standard and a highlighted version for a given Feature.
 ///
-/// This implementation only contains the standard (non-highlighted) style
-/// option. The map can either contain a KMLStyleUrl or a KMLStyle, but
-/// not both.
+/// This implementation only contains the standard (non-highlighted) style option. The map can either contain
+/// a KMLStyleUrl or a KMLStyle, but not both.
 ///
 /// For definition, see [KML Spec](https://developers.google.com/kml/documentation/kmlreference#stylemap)
 public struct KMLStyleMap: KMLStyleSelector {
     public var id: String?
     public var content: AnyKMLStyle
-//    var highlighted: KMLStyleUrl //ignore highlighted
 
     public static var kmlTag: String {
         "StyleMap"
@@ -73,7 +70,10 @@ fileprivate extension KMLTagName {
 
 extension KMLStyleMap {
     struct Pair: KMLObject {
-        enum StyleState: String { case normal, highlight }
+        enum StyleState: String {
+            case normal
+            case highlight
+        }
 
         var id: String?
         var key: StyleState

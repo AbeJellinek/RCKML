@@ -8,8 +8,7 @@
 import AEXML
 import Foundation
 
-/// A wrapper around a KMLStyleSelector's id, used for referencing that
-/// style from another style.
+/// A wrapper around a KMLStyleSelector's id, used for referencing that style from another style.
 ///
 /// For more info, see [KML Spec](https://developers.google.com/kml/documentation/kmlreference#styleurl)
 public struct KMLStyleUrl: Hashable {
@@ -20,7 +19,7 @@ public struct KMLStyleUrl: Hashable {
     }
 }
 
-// MARK: - KML Codable
+// MARK: - KML Value Codable
 
 extension KMLStyleUrl: KMLValue {
     var kmlString: String {
