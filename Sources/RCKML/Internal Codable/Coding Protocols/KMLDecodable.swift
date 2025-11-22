@@ -9,6 +9,6 @@ protocol KMLDecodable: KMLObject {
     init(from decoder: KMLDecoder) throws
 }
 
-protocol SomeDecodableKML: SomeKML {
+protocol AnyDecodableKML: AnyKML {
     init(from decoder: KMLDecoder) throws
 }

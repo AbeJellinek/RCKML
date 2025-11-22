@@ -18,7 +18,7 @@ import Foundation
 /// For definition, see [KML Spec](https://developers.google.com/kml/documentation/kmlreference#stylemap)
 public struct KMLStyleMap: KMLStyleSelector {
     public var id: String?
-    public var content: SomeKMLStyle
+    public var content: AnyKMLStyle
 //    var highlighted: KMLStyleUrl //ignore highlighted
 
     public static var kmlTag: String {
@@ -77,7 +77,7 @@ extension KMLStyleMap {
 
         var id: String?
         var key: StyleState
-        var content: SomeKMLStyle
+        var content: AnyKMLStyle
 
         static var kmlTag: String { "Pair" }
     }
@@ -88,7 +88,7 @@ extension KMLStyleMap.Pair: KMLDecodable {
         try decoder.verifyMatchesType(Self.self)
         id = decoder.idAttribute
         key = try decoder.value(of: StyleState.self, forKey: .pairKey)
-        content = try decoder.child(of: SomeKMLStyle.self)
+        content = try decoder.child(of: AnyKMLStyle.self)
     }
 }
 

@@ -16,7 +16,7 @@ public struct KMLFolder: KMLFeature, KMLContainer {
     public var id: String?
     public var name: String?
     public var featureDescription: String?
-    public var features: [SomeKMLFeature]
+    public var features: [AnyKMLFeature]
 
     public static var featureType: KMLFeatureType {
         .folder
@@ -26,7 +26,7 @@ public struct KMLFolder: KMLFeature, KMLContainer {
         id: String? = nil,
         name: String? = nil,
         featureDescription: String? = nil,
-        features: [SomeKMLFeature] = []
+        features: [AnyKMLFeature] = []
     ) {
         self.id = id
         self.name = name
@@ -53,6 +53,6 @@ extension KMLFolder: KMLDecodable {
         id = decoder.idAttribute
         name = try decoder.value(of: String.self, forKey: .name)
         featureDescription = try decoder.value(of: String.self, forKey: .description)
-        features = try decoder.allChildren(of: SomeKMLFeature.self)
+        features = try decoder.allChildren(of: AnyKMLFeature.self)
     }
 }

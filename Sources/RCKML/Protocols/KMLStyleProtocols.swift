@@ -35,12 +35,12 @@ public protocol KMLColorStyle: KMLObject {
     var color: KMLColor? { get }
 }
 
-public enum SomeKMLStyle {
+public enum AnyKMLStyle {
     case styleUrl(KMLStyleUrl)
     case style(KMLStyle)
 }
 
-extension SomeKMLStyle: SomeDecodableKML, SomeEncodableKML {
+extension AnyKMLStyle: AnyDecodableKML, AnyEncodableKML {
     public var wrapped: Any {
         switch self {
         case .styleUrl(let styleUrl):
@@ -83,7 +83,7 @@ extension SomeKMLStyle: SomeDecodableKML, SomeEncodableKML {
     }
 }
 
-public enum SomeKMLStyleSelector: SomeKML {
+public enum AnyKMLStyleSelector: AnyKML {
     case styleMap(KMLStyleMap)
     case style(KMLStyle)
 
@@ -108,7 +108,7 @@ public enum SomeKMLStyleSelector: SomeKML {
     }
 }
 
-extension SomeKMLStyleSelector: SomeDecodableKML {
+extension AnyKMLStyleSelector: AnyDecodableKML {
     init(from decoder: KMLDecoder) throws {
         switch decoder.tagName {
         case KMLStyleMap.kmlTag:
@@ -121,7 +121,7 @@ extension SomeKMLStyleSelector: SomeDecodableKML {
     }
 }
 
-extension SomeKMLStyleSelector: SomeEncodableKML {
+extension AnyKMLStyleSelector: AnyEncodableKML {
     var encodable: EncodingValueType {
         switch self {
         case .styleMap(let styleMap):

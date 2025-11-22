@@ -97,7 +97,7 @@ struct KMLDecoder {
     /// <#Description#>
     /// - Parameter type: <#type description#>
     /// - Returns: <#description#>
-    func child<K: SomeDecodableKML>(of type: K.Type) throws -> K {
+    func child<K: AnyDecodableKML>(of type: K.Type) throws -> K {
         for aChild in xml.children {
             do {
                 let childDeocder = KMLDecoder(aChild)
@@ -114,7 +114,7 @@ struct KMLDecoder {
     /// <#Description#>
     /// - Parameter type: <#type description#>
     /// - Returns: <#description#>
-    func allChildren<K: SomeDecodableKML>(of type: K.Type) throws -> [K] {
+    func allChildren<K: AnyDecodableKML>(of type: K.Type) throws -> [K] {
         try xml.children
             .map(KMLDecoder.init)
             .compactMap { aDecoder in

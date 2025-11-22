@@ -14,7 +14,7 @@ enum EncodingValueType {
     case value(name: KMLTagName, value: any KMLValue)
 }
 
-protocol SomeEncodableKML: SomeKML {
+protocol AnyEncodableKML: AnyKML {
     var encodable: EncodingValueType { get }
 }
 

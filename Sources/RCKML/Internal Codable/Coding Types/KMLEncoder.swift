@@ -53,7 +53,7 @@ struct KMLEncoder {
         try encodeChild(object)
     }
 
-    func encodeChild<C: SomeEncodableKML>(_ object: C) throws {
+    func encodeChild<C: AnyEncodableKML>(_ object: C) throws {
         switch object.encodable {
         case .object(let objectType):
             try encodeChild(objectType)
@@ -62,7 +62,7 @@ struct KMLEncoder {
         }
     }
 
-    func encodeChild<C: SomeEncodableKML>(_ object: C?) throws {
+    func encodeChild<C: AnyEncodableKML>(_ object: C?) throws {
         if let object {
             try encodeChild(object)
         }

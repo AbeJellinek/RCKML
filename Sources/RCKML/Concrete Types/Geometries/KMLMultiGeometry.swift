@@ -33,7 +33,7 @@ public struct KMLMultiGeometry: KMLGeometry {
 extension KMLMultiGeometry: KMLEncodable {
     func encode(to encoder: KMLEncoder) throws {
         for geometry in geometries {
-            let encodableGeometry = try SomeKMLGeometry(geometry)
+            let encodableGeometry = try AnyKMLGeometry(geometry)
             try encoder.encodeChild(encodableGeometry)
         }
     }
@@ -44,7 +44,7 @@ extension KMLMultiGeometry: KMLDecodable {
         try decoder.verifyMatchesType(Self.self)
         id = decoder.idAttribute
 
-        let subGeometries = try decoder.allChildren(of: SomeKMLGeometry.self)
+        let subGeometries = try decoder.allChildren(of: AnyKMLGeometry.self)
         self.geometries = subGeometries.map(\.wrapped)
     }
 }

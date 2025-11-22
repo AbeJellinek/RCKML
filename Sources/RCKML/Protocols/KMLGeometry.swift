@@ -34,7 +34,7 @@ public enum KMLGeometryType: String, CaseIterable {
     case multiGeometry = "MultiGeometry"
 }
 
-public enum SomeKMLGeometry: SomeKML {
+public enum AnyKMLGeometry: AnyKML {
     case lineString(KMLLineString)
     case polygon(KMLPolygon)
     case point(KMLPoint)
@@ -69,7 +69,7 @@ public enum SomeKMLGeometry: SomeKML {
     }
 }
 
-extension SomeKMLGeometry: SomeDecodableKML {
+extension AnyKMLGeometry: AnyDecodableKML {
     init(from decoder: KMLDecoder) throws {
         switch decoder.tagName {
         case KMLLineString.kmlTag:
@@ -86,7 +86,7 @@ extension SomeKMLGeometry: SomeDecodableKML {
     }
 }
 
-extension SomeKMLGeometry: SomeEncodableKML {
+extension AnyKMLGeometry: AnyEncodableKML {
     var encodable: EncodingValueType {
         switch self {
         case .lineString(let lineString):

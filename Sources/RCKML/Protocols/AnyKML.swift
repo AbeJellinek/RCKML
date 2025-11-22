@@ -1,5 +1,5 @@
 //
-//  SomeKML.swift
+//  AnyKML.swift
 //  RCKML
 //
 //  Created by Ryan Linn on 11/17/25.
@@ -7,7 +7,7 @@
 
 public struct UnknownKMLType: Error {}
 
-public protocol SomeKML {
+public protocol AnyKML {
     associatedtype Wrapped
 
     var wrapped: Wrapped { get }

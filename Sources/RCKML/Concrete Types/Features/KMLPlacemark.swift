@@ -17,8 +17,8 @@ public struct KMLPlacemark: KMLFeature {
     public var id: String?
     public var name: String?
     public var featureDescription: String?
-    public var geometry: SomeKMLGeometry
-    public var style: SomeKMLStyle?
+    public var geometry: AnyKMLGeometry
+    public var style: AnyKMLStyle?
 
     public static var featureType: KMLFeatureType {
         .placemark
@@ -28,7 +28,7 @@ public struct KMLPlacemark: KMLFeature {
         id: String? = nil,
         name: String,
         featureDescription: String? = nil,
-        geometry: SomeKMLGeometry,
+        geometry: AnyKMLGeometry,
         styleUrl: KMLStyleUrl
     ) {
         self.id = id
@@ -42,7 +42,7 @@ public struct KMLPlacemark: KMLFeature {
         id: String? = nil,
         name: String,
         featureDescription: String? = nil,
-        geometry: SomeKMLGeometry,
+        geometry: AnyKMLGeometry,
         style: KMLStyle
     ) {
         self.id = id
@@ -56,7 +56,7 @@ public struct KMLPlacemark: KMLFeature {
         id: String? = nil,
         name: String,
         featureDescription: String? = nil,
-        geometry: SomeKMLGeometry
+        geometry: AnyKMLGeometry
     ) {
         self.id = id
         self.name = name
@@ -88,10 +88,10 @@ extension KMLPlacemark: KMLDecodable {
         name = try? decoder.value(of: String.self, forKey: .name)
         featureDescription = try? decoder.value(of: String.self, forKey: .description)
 
-        style = try? decoder.child(of: SomeKMLStyle.self)
+        style = try? decoder.child(of: AnyKMLStyle.self)
 
         // geometry:
-        let geometries = try decoder.allChildren(of: SomeKMLGeometry.self)
+        let geometries = try decoder.allChildren(of: AnyKMLGeometry.self)
         if geometries.count > 1 {
             throw GeometryCountError(count: geometries.count)
         }

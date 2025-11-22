@@ -13,7 +13,7 @@ import Foundation
 /// For definition, see [KML Spec](https://developers.google.com/kml/documentation/kmlreference#container)
 public protocol KMLContainer: KMLObject {
     /// An array of all contained KMLFeatures in this container.
-    var features: [SomeKMLFeature] { get }
+    var features: [AnyKMLFeature] { get }
 }
 
 // MARK: - Default Functions

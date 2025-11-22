@@ -64,7 +64,7 @@ public enum KMLFeatureType: String, CaseIterable {
     }
 }
 
-public enum SomeKMLFeature: SomeKML {
+public enum AnyKMLFeature: AnyKML {
     case placemark(KMLPlacemark)
     case folder(KMLFolder)
 
@@ -89,7 +89,7 @@ public enum SomeKMLFeature: SomeKML {
     }
 }
 
-extension SomeKMLFeature: SomeDecodableKML {
+extension AnyKMLFeature: AnyDecodableKML {
     init(from decoder: KMLDecoder) throws {
         switch decoder.tagName {
         case KMLFolder.kmlTag:
@@ -102,7 +102,7 @@ extension SomeKMLFeature: SomeDecodableKML {
     }
 }
 
-extension SomeKMLFeature: SomeEncodableKML {
+extension AnyKMLFeature: AnyEncodableKML {
     var encodable: EncodingValueType {
         switch self {
         case .placemark(let placemark):
