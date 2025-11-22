@@ -5,34 +5,16 @@
 //  Created by Ryan Linn on 6/16/21.
 //
 
-import AEXML
-import Foundation
-
 // MARK: - Geometry Protocol
 
 /// Any KMLObject type to be used in *Geometry* objects of a KML document.
 ///
 /// For definition, see [KML spec](https://developers.google.com/kml/documentation/kmlreference#geometry)
 public protocol KMLGeometry: KMLObject {
-    /// Type-level definition to map conforming type to a known KML Geometry class.
-    static var geometryType: KMLGeometryType { get }
+    // No specific requirements
 }
 
-public extension KMLGeometry {
-    static var kmlTag: String {
-        geometryType.rawValue
-    }
-}
-
-// MARK: - Known Geometry Types
-
-/// Helper to map between Geometry objects in a KML file and this library's corresponding `KMLGeometry`.
-public enum KMLGeometryType: String, CaseIterable {
-    case lineString = "LineString"
-    case polygon = "Polygon"
-    case point = "Point"
-    case multiGeometry = "MultiGeometry"
-}
+// MARK: - AnyKMLGeometry
 
 public enum AnyKMLGeometry: AnyKML {
     case lineString(KMLLineString)
@@ -68,6 +50,8 @@ public enum AnyKMLGeometry: AnyKML {
         }
     }
 }
+
+// MARK: - AnyKMLGeometry Codable
 
 extension AnyKMLGeometry: AnyDecodableKML {
     init(from decoder: KMLDecoder) throws {

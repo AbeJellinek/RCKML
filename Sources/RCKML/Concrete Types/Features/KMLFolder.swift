@@ -5,9 +5,6 @@
 //  Created by Ryan Linn on 6/17/21.
 //
 
-import AEXML
-import Foundation
-
 /// A feature to be included in KML files, which can contain any number of  other KML features, including sub-folders.
 ///
 /// For reference, see [KML Spec](https://developers.google.com/kml/documentation/kmlreference#folder)
@@ -17,8 +14,8 @@ public struct KMLFolder: KMLFeature, KMLContainer {
     public var featureDescription: String?
     public var features: [AnyKMLFeature]
 
-    public static var featureType: KMLFeatureType {
-        .folder
+    public static var kmlTag: String {
+        "Folder"
     }
 
     public init(

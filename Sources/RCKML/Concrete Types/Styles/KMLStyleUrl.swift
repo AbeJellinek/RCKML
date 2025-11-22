@@ -5,9 +5,6 @@
 //  Created by Ryan Linn on 6/18/21.
 //
 
-import AEXML
-import Foundation
-
 /// A wrapper around a KMLStyleSelector's id, used for referencing that style from another style.
 ///
 /// For more info, see [KML Spec](https://developers.google.com/kml/documentation/kmlreference#styleurl)

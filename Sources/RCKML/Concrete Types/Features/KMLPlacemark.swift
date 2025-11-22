@@ -5,9 +5,6 @@
 //  Created by Ryan Linn on 6/17/21.
 //
 
-import AEXML
-import Foundation
-
 /// A Feature that is associated with a Geometry, and the main tool  in a KML file. A placemark includes a
 /// Geometry object, and any  descriptive information about it.
 ///
@@ -19,8 +16,8 @@ public struct KMLPlacemark: KMLFeature {
     public var geometry: AnyKMLGeometry
     public var style: AnyKMLStyle?
 
-    public static var featureType: KMLFeatureType {
-        .placemark
+    public static var kmlTag: String {
+        "Placemark"
     }
 
     public init(

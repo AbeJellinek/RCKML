@@ -5,9 +5,6 @@
 //  Created by Ryan Linn on 6/17/21.
 //
 
-import AEXML
-import Foundation
-
 /// A single point on Earth represented by latitude and longitude,  plus an optional altitude (expressed in
 /// meters above sea level).
 public struct KMLCoordinate {

@@ -5,9 +5,6 @@
 //  Created by Ryan Linn on 6/18/21.
 //
 
-import AEXML
-import Foundation
-
 /// A style used to draw lines or polygon boundaries with a given width and color.
 ///
 /// For definition, see [KML Spec](https://developers.google.com/kml/documentation/kmlreference#linestyle)

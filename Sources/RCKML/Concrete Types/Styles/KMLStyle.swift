@@ -5,9 +5,6 @@
 //  Created by Ryan Linn on 6/18/21.
 //
 
-import AEXML
-import Foundation
-
 /// A wrapper around possible KML style types used to determine drawing behavior for an object, referenced
 /// either inside a KMLFeature, or from a KMLStyleMap by its id.
 ///

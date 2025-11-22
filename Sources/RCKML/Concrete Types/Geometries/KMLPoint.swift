@@ -5,9 +5,6 @@
 //  Created by Ryan Linn on 6/17/21.
 //
 
-import AEXML
-import Foundation
-
 /// A KML geometry associated with a single point on the Earth.
 ///
 /// For reference, see [KML Documentation](https://developers.google.com/kml/documentation/kmlreference#point)
@@ -15,8 +12,8 @@ public struct KMLPoint: KMLGeometry {
     public var id: String?
     public var coordinate: KMLCoordinate
 
-    public static var geometryType: KMLGeometryType {
-        .point
+    public static var kmlTag: String {
+        "Point"
     }
 
     public init(coordinate: KMLCoordinate) {

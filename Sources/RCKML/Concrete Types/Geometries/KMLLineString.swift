@@ -5,9 +5,6 @@
 //  Created by Ryan Linn on 6/17/21.
 //
 
-import AEXML
-import Foundation
-
 /// A series of KMLCoordinates connected in order to form  a line on the map.
 ///
 /// For reference, see [KML Documentation](https://developers.google.com/kml/documentation/kmlreference#linestring)
@@ -23,8 +20,8 @@ public struct KMLLineString: KMLGeometry {
         self.coordinates = coordinates
     }
 
-    public static var geometryType: KMLGeometryType {
-        .lineString
+    public static var kmlTag: String {
+        "LineString"
     }
 }
 

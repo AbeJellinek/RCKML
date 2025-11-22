@@ -5,9 +5,6 @@
 //  Created by Ryan Linn on 6/18/21.
 //
 
-import AEXML
-import Foundation
-
 /// Any KMLObject that can contain one or more sub-element KMLFeatures.
 ///
 /// For definition, see [KML Spec](https://developers.google.com/kml/documentation/kmlreference#container)

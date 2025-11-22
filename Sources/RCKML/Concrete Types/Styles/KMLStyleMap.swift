@@ -5,9 +5,6 @@
 //  Created by Ryan Linn on 6/18/21.
 //
 
-import AEXML
-import Foundation
-
 /// A wrapper around one or two KMLStyles to provide a standard and a highlighted version for a given Feature.
 ///
 /// This implementation only contains the standard (non-highlighted) style option. The map can either contain

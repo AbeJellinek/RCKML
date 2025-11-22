@@ -5,9 +5,6 @@
 //  Created by Ryan Linn on 6/18/21.
 //
 
-import AEXML
-import Foundation
-
 /// A geometry type representing a collection of other geometries.
 ///
 /// For reference, see [KML Documentation](https://developers.google.com/kml/documentation/kmlreference#multigeometry)
@@ -15,8 +12,8 @@ public struct KMLMultiGeometry: KMLGeometry {
     public var id: String?
     public var geometries: [AnyKMLGeometry]
 
-    public static var geometryType: KMLGeometryType {
-        .multiGeometry
+    public static var kmlTag: String {
+        "MultiGeometry"
     }
 
     public init(

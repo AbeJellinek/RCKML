@@ -5,26 +5,50 @@
 //  Created by Ryan Linn on 6/18/21.
 //
 
-import AEXML
-import Foundation
+public enum AnyKMLStyle {
+    case styleUrl(KMLStyleUrl)
+    case style(KMLStyle)
+}
 
-/// Protocol for conforming to the abstract KML element type *StyleSelector*,
-/// which is the base type for *Style* and *StyleMap*.
+// MARK: - StyleSelector
+
+/// Protocol for conforming to the abstract KML element type *StyleSelector*, which is the base type for
+/// *Style* and *StyleMap*.
 ///
 /// For definition, see [KML spec](https://developers.google.com/kml/documentation/kmlreference#styleselector)
 public protocol KMLStyleSelector: KMLObject {
-    /// Identifier of the KML element, which can be set in order to read
-    /// styles from the main body of the KML document via a *KMLStyleMap*
-    var id: String? { get }
+    // No specific requirements
 }
 
-enum KMLStyleSelectorType: String, CaseIterable {
-    case styleMap = "StyleMap"
-    case style = "Style"
+public enum AnyKMLStyleSelector: AnyKML {
+    case styleMap(KMLStyleMap)
+    case style(KMLStyle)
+
+    public var wrapped: KMLStyleSelector {
+        switch self {
+        case .styleMap(let styleMap):
+            styleMap
+        case .style(let style):
+            style
+        }
+    }
+
+    public init(_ wrapped: KMLStyleSelector) throws(UnknownKMLType) {
+        switch wrapped {
+        case let styleMap as KMLStyleMap:
+            self = .styleMap(styleMap)
+        case let style as KMLStyle:
+            self = .style(style)
+        default:
+            throw UnknownKMLType()
+        }
+    }
 }
 
-/// Protocol for conforming to the abstract KML element *ColorStyle*,
-/// which is the base type for *LineStyle*, *PolyStyle*, *IconStyle*, and *LabelStyle*
+// MARK: - ColorStyle
+
+/// Protocol for conforming to the abstract KML element *ColorStyle*,  which is the base type for
+/// *LineStyle*, *PolyStyle*, *IconStyle*, and *LabelStyle*
 ///
 /// For definition, see [KML spec](https://developers.google.com/kml/documentation/kmlreference#colorstyle)
 public protocol KMLColorStyle: KMLObject {
@@ -35,10 +59,7 @@ public protocol KMLColorStyle: KMLObject {
     var color: KMLColor? { get }
 }
 
-public enum AnyKMLStyle {
-    case styleUrl(KMLStyleUrl)
-    case style(KMLStyle)
-}
+// MARK: - AnyKMLStyle Codable
 
 extension AnyKMLStyle: AnyDecodableKML, AnyEncodableKML {
     public var wrapped: Any {
@@ -83,30 +104,7 @@ extension AnyKMLStyle: AnyDecodableKML, AnyEncodableKML {
     }
 }
 
-public enum AnyKMLStyleSelector: AnyKML {
-    case styleMap(KMLStyleMap)
-    case style(KMLStyle)
-
-    public var wrapped: KMLStyleSelector {
-        switch self {
-        case .styleMap(let styleMap):
-            styleMap
-        case .style(let style):
-            style
-        }
-    }
-
-    public init(_ wrapped: KMLStyleSelector) throws(UnknownKMLType) {
-        switch wrapped {
-        case let styleMap as KMLStyleMap:
-            self = .styleMap(styleMap)
-        case let style as KMLStyle:
-            self = .style(style)
-        default:
-            throw UnknownKMLType()
-        }
-    }
-}
+// MARK: - AnyKMLStyleSelector Codable
 
 extension AnyKMLStyleSelector: AnyDecodableKML {
     init(from decoder: KMLDecoder) throws {

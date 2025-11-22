@@ -5,9 +5,6 @@
 //  Created by Ryan Linn on 6/18/21.
 //
 
-import AEXML
-import Foundation
-
 /// A style used to determine fill color and whether to draw the outline of a polygon.
 ///
 /// For definition, see [KML Spec](https://developers.google.com/kml/documentation/kmlreference#polystyle)

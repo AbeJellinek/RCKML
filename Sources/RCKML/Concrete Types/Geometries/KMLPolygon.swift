@@ -5,9 +5,6 @@
 //  Created by Ryan Linn on 6/17/21.
 //
 
-import AEXML
-import Foundation
-
 /// A geometry representing an enclosed region, possibly including inner cut-out boundaries as well.
 ///
 /// For reference, see [KML Documentation](https://developers.google.com/kml/documentation/kmlreference#polygon)
@@ -20,8 +17,8 @@ public struct KMLPolygon: KMLGeometry {
     /// An optional array of internal boundaries inside the polygon, which represent holes in the polygon.
     public var innerBoundaryIs: [LinearRing]?
 
-    public static var geometryType: KMLGeometryType {
-        .polygon
+    public static var kmlTag: String {
+        "Polygon"
     }
 
     public init(
