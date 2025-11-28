@@ -7,13 +7,26 @@
 
 import Foundation
 
-/// <#Description#>
+/// A type that can be read from or written to a KML file as a simple property of a `KMLObject`.
+///
+/// Any value type can be a `KMLValue` as long as it can be read from a String or written to a String, with
+/// no children.
+///
+/// For example, in the following KML string, "My Name" and "0" are both `KMLValue`s, one of type `String`,
+/// and the other of type `Bool` (although it could also be `Int`).
+///
+/// ```
+/// <Placemark>
+///    <name>My Name</name>
+///    <open>0</open>
+/// </Placemark>
+/// ```
 protocol KMLValue {
     var kmlString: String { get }
     init(kmlString: String) throws
 }
 
-struct KMLValueDecodeError<V: KMLValue>: LocalizedError {
+struct KMLValueDecodeError<V: KMLValue>: Error {
     var value: String
 
     init(type: V.Type, value: String) {

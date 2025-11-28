@@ -7,7 +7,26 @@
 
 import AEXML
 
-/// <#Description#>
+// MARK: - Error Types
+
+struct XMLTagMismatch: Error {
+    var expectedTag: String
+    var actualTag: String
+}
+
+enum KMLDecoderError: Error {
+    case xml(AEXMLError)
+    case rawValueDecodeFailed(expected: Any.Type)
+    case childTypeNotFound(expected: String)
+}
+
+// MARK: - Decoder
+
+/// A wrapper around an XML element, used to decode KML elements from a string or file.
+///
+/// A `KMLDecoder` should never be created directly. It is provided to types conforming to
+/// `KMLDecodable` in the `init(from:)` function, and should be used to read the KML object's
+/// properties from the XML element.
 struct KMLDecoder {
     private let xml: AEXMLElement
 
@@ -17,22 +36,55 @@ struct KMLDecoder {
 
     var idAttribute: String? { xml.attributes["id"] }
     
-    /// <#Description#>
+    /// Returns the name of the wrapped XML element.
+    ///
+    /// For example, if the wrapped XML element is:
+    ///
+    /// ```
+    /// <Container><Placemark></Placemark><Folder></Folder></Container>
+    /// ```
+    ///
+    /// The `tagName` of the element is `Container`. Child elements have the name `Placemark`
+    /// and `Folder`.
     var tagName: String { xml.name }
     
-    /// <#Description#>
-    /// - Parameter type: <#type description#>
+    /// Compares the `tagName` property of the decoder to the `kmlTag` property of the
+    /// `KMLDecodable` type provided.
+    ///
+    /// - Parameter type: The expected `KMLDecodable` type to be initialized. This should
+    /// generally be called as `Self.self`, in order to prepare the `init(from:)` initializer.
+    ///
+    /// - Throws: `XMLTagMismatch` if the tag doesn't match the expected type.
     func verifyMatchesType<K: KMLDecodable>(_ type: K.Type) throws(XMLTagMismatch) {
         if K.kmlTag != tagName {
             throw XMLTagMismatch(expectedTag: K.kmlTag, actualTag: tagName)
         }
     }
 
-    /// <#Description#>
+    /// Decodes a basic value from the decoder.
+    ///
     /// - Parameters:
-    ///   - type: <#type description#>
-    ///   - key: <#key description#>
-    /// - Returns: <#description#>
+    ///   - type: The expected type to return.
+    ///   - key: The XML tag name containing the decodable value.
+    ///
+    /// - Returns: The decoded value.
+    ///
+    /// - Throws: Either a `KMLDecoderError` if an XML element with the given tag name can't be
+    /// found, or another error type if an XML element exists but could not be converted to the expected
+    /// `KMLValue` type.
+    ///
+    /// If multiple children have the same tag name, the decoder will only attempt to decode the first
+    /// available.
+    ///
+    /// Example:
+    ///
+    /// ```swift
+    /// // KMLDecoder wrapping the following element:
+    /// // <Placemark><name>My Location</name></Placemark>
+    ///
+    /// let placeName = try decoder.value(of: String.self, forKey: .name)
+    /// // placeName == "My Location"
+    /// ```
     func value<K: KMLValue>(of type: K.Type, forKey key: KMLTagName) throws -> K {
         let item = xml[key.name]
         if let error = item.error {
@@ -42,11 +94,31 @@ struct KMLDecoder {
         return typedValue
     }
     
-    /// <#Description#>
+    /// Decodes a basic value from the decoder, using a `RawRepresentable` value that can be converted
+    /// to `KMLValue`.
+    ///
     /// - Parameters:
-    ///   - type: <#type description#>
-    ///   - key: <#key description#>
-    /// - Returns: <#description#>
+    ///   - type: The expected type to return.
+    ///   - key: The XML tag name containing the decodable value.
+    ///
+    /// - Returns: The decoded value.
+    ///
+    /// - Throws: Either a `KMLDecoderError` if an XML element with the given tag name can't be
+    /// found, or another error type if an XML element exists but could not be converted to the expected
+    /// `KMLValue` type.
+    ///
+    /// If multiple children have the same tag name, the decoder will only attempt to decode the first
+    /// available.
+    ///
+    /// Example:
+    ///
+    /// ```swift
+    /// // KMLDecoder wrapping the following element:
+    /// // <Placemark><name>My Location</name></Placemark>
+    ///
+    /// let placeName = try decoder.value(of: String.self, forKey: .name)
+    /// // placeName == "My Location"
+    /// ```
     func value<R: RawRepresentable>(
         of type: R.Type,
         forKey key: KMLTagName
@@ -58,12 +130,27 @@ struct KMLDecoder {
         return value
     }
     
-    /// <#Description#>
+    /// Decodes a basic value from the decoder, optionally returning a default value if the decoder fails..
+    ///
     /// - Parameters:
-    ///   - type: <#type description#>
-    ///   - key: <#key description#>
-    ///   - `default`: <#`default` description#>
-    /// - Returns: <#description#>
+    ///   - type: The expected type to return.
+    ///   - key: The XML tag name containing the decodable value.
+    ///   - default:The value to return if the decoder can't find or decode an XML element.
+    ///
+    /// - Returns: The decoded value, or the default value..
+    ///
+    /// If multiple children have the same tag name, the decoder will only attempt to decode the first
+    /// available.
+    ///
+    /// Example:
+    ///
+    /// ```swift
+    /// // KMLDecoder wrapping the following empty element:
+    /// // <Placemark></Placemark>
+    ///
+    /// let placeName = try decoder.value(of: String.self, forKey: .name, default: "No Name")
+    /// // placeName == "No Name"
+    /// ```
     func value<K: KMLValue>(of type: K.Type, forKey key: KMLTagName, `default`: K) -> K {
         if let value = try? value(of: type, forKey: key) {
             return value
@@ -72,9 +159,27 @@ struct KMLDecoder {
         }
     }
 
-    /// <#Description#>
-    /// - Parameter type: <#type description#>
-    /// - Returns: <#description#>
+    /// Decodes a child object of the given type from the decoder.
+    ///
+    /// - Parameter type: The expected `KMLDecodable` type to decode.
+    ///
+    /// - Returns: The first XML child element matching the output type's `kmlTag` property, decoded
+    /// into that output type.
+    ///
+    /// - Throws: If no child matching the output type's `kmlTag` property is found, or if the first matching
+    /// child element fails to decode into the matching output type.
+    ///
+    /// If multiple children of the child type exist, the decoder will only attempt to decode the first available.
+    ///
+    /// Example:
+    ///
+    /// ```swift
+    /// // KMLDecoder wrapping the following element:
+    /// // <Placemark><Point><coordinates>1,2,3</coordinates></Point></Placemark>
+    ///
+    /// let pointGeometry = try decoder.child(of: Point.self)
+    /// // pointGeometry is an instance of KMLPoint
+    /// ```
     func child<K: KMLDecodable>(of type: K.Type) throws -> K {
         let child = xml[type.kmlTag]
         if let error = child.error {
@@ -85,18 +190,51 @@ struct KMLDecoder {
         return kmlType
     }
 
-    /// <#Description#>
-    /// - Parameter type: <#type description#>
-    /// - Returns: <#description#>
-    func children<K: KMLDecodable>(of type: K.Type) -> [K] {
-        xml.children
+    /// Decodes all child objects of the given type from the decoder.
+    ///
+    /// - Parameter type: The expected `KMLDecodable` type to decode.
+    ///
+    /// - Returns: All XML child elements matching the output type's `kmlTag` property, decoded
+    /// into that output type. If no children of the matching type exist, the return value is an empty array.
+    ///
+    /// - Throws: If any of the child elements fail to decode.
+    ///
+    /// Example:
+    ///
+    /// ```swift
+    /// // KMLDecoder wrapping the following element:
+    /// // <Placemark><Point><coordinates>1,2,3</coordinates></Point></Placemark>
+    ///
+    /// let points = try decoder.children(of: Point.self)
+    /// // points is an array with a single instance of KMLPoint
+    /// ```
+    func children<K: KMLDecodable>(of type: K.Type) throws -> [K] {
+        try xml.children
             .filter { $0.name == K.kmlTag }
-            .compactMap { try? K(from: KMLDecoder($0)) }
+            .map { try K(from: KMLDecoder($0)) }
     }
     
-    /// <#Description#>
-    /// - Parameter type: <#type description#>
-    /// - Returns: <#description#>
+    /// Decodes the first child object of the given type from the decoder.
+    ///
+    /// - Parameter type: The expected `AnyDecodableKML` type to decode.
+    ///
+    /// - Returns: The first XML child element that can be decoded into the given `AnyDecodableKML`
+    /// type, if any.
+    ///
+    /// - Throws: If no child element can be found that can be decoded into the `AnyDecodableKML`
+    /// type, or if any of the attempted elements fail to decode.
+    ///
+    /// If multiple children of the child type exist, the decoder will only attempt to decode the first available.
+    ///
+    /// Example:
+    ///
+    /// ```swift
+    /// // KMLDecoder wrapping the following element:
+    /// // <Placemark><Point><coordinates>1,2,3</coordinates></Point></Placemark>
+    ///
+    /// let anyGeometry = try decoder.child(of: AnyKMLGeometry.self)
+    /// // pointGeometry is AnyKMLGeometry.point(point)
+    /// ```
     func child<K: AnyDecodableKML>(of type: K.Type) throws -> K {
         for aChild in xml.children {
             do {
@@ -111,9 +249,24 @@ struct KMLDecoder {
         throw KMLDecoderError.childTypeNotFound(expected: String(describing: K.self))
     }
     
-    /// <#Description#>
-    /// - Parameter type: <#type description#>
-    /// - Returns: <#description#>
+    /// Decodes all child objects of the given type from the decoder.
+    ///
+    /// - Parameter type: The expected `AnyDecodableKML` type to decode.
+    ///
+    /// - Returns: All XML child elements that can  be decoded into the given `AnyDecodableKML`
+    /// type. If no children of the matching type exist, the return value is an empty array.
+    ///
+    /// - Throws: If any of the child elements fail to decode.
+    ///
+    /// Example:
+    ///
+    /// ```swift
+    /// // KMLDecoder wrapping the following element:
+    /// // <Placemark><Point><coordinates>1,2,3</coordinates></Point></Placemark>
+    ///
+    /// let geometries = try decoder.children(of: AnyKMLGeometry.self)
+    /// // geometries is an array with a single instance of AnyKMLGeometry.point(point)
+    /// ```
     func allChildren<K: AnyDecodableKML>(of type: K.Type) throws -> [K] {
         try xml.children
             .map(KMLDecoder.init)
@@ -127,9 +280,28 @@ struct KMLDecoder {
             }
     }
     
-    /// <#Description#>
-    /// - Parameter tag: <#tag description#>
-    /// - Returns: <#description#>
+    /// Attempts to decode an untyped child element from the child elements of this decoder.
+    ///
+    /// - Parameter tag: The name of the expected child element
+    ///
+    /// - Returns: An untyped `KMLDecoder` wrapping the child element.
+    ///
+    /// - Throws: If no element with the given name can be found.
+    ///
+    /// Use this function only for elements that should contain other sub-elements, but have no other KML
+    /// type requirements. For example, given the following element:
+    ///
+    /// ```
+    /// <Polygon>
+    /// <innerBoundaryIs>
+    /// <LinearRing></LinearRing>
+    /// <LinearRing></LinearRing>
+    /// </innerBoundaryIs>
+    /// </Polygon>
+    /// ```
+    ///
+    /// Use `subContainer(withName:)` to access the `innerBoundaryIs` element, which can
+    /// then be used to access children of type `LinearRing`.
     func subContainer(withName tag: KMLTagName) throws -> KMLDecoder {
         let nested = xml[tag.name]
         if let error = nested.error {
@@ -138,17 +310,4 @@ struct KMLDecoder {
         let container = KMLDecoder(nested)
         return container
     }
-}
-
-// MARK: - Error Types
-
-struct XMLTagMismatch: Error {
-    var expectedTag: String
-    var actualTag: String
-}
-
-enum KMLDecoderError: Error {
-    case xml(AEXMLError)
-    case rawValueDecodeFailed(expected: Any.Type)
-    case childTypeNotFound(expected: String)
 }

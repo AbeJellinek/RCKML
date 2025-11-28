@@ -72,7 +72,7 @@ extension KMLPolygon: KMLDecodable {
         outerBoundaryIs = try outerBoundaryContainer.child(of: LinearRing.self)
 
         if let innerBoundsContainer = try? container.subContainer(withName: .innerBoundaryIs) {
-            let decodedInnerBounds = innerBoundsContainer.children(of: LinearRing.self)
+            let decodedInnerBounds = try innerBoundsContainer.children(of: LinearRing.self)
             if !decodedInnerBounds.isEmpty {
                 innerBoundaryIs = decodedInnerBounds
             }
@@ -82,11 +82,11 @@ extension KMLPolygon: KMLDecodable {
 
 extension KMLPolygon: KMLEncodable {
     func encode(to encoder: KMLEncoder) throws {
-        let outerBoundaryContainer = try encoder.addContainer(tag: .outerBoundaryIs)
+        let outerBoundaryContainer = try encoder.encodeContainer(tag: .outerBoundaryIs)
         try outerBoundaryContainer.encodeChild(outerBoundaryIs)
 
         if let innerBoundaryIs, !innerBoundaryIs.isEmpty {
-            let innerBoundaryContainer = try encoder.addContainer(tag: .innerBoundaryIs)
+            let innerBoundaryContainer = try encoder.encodeContainer(tag: .innerBoundaryIs)
             for innerRing in innerBoundaryIs {
                 try innerBoundaryContainer.encodeChild(innerRing)
             }
