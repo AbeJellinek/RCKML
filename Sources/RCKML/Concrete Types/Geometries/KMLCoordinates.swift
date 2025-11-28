@@ -5,9 +5,11 @@
 //  Created by Ryan Linn on 6/17/21.
 //
 
+import Foundation
+
 /// A single point on Earth represented by latitude and longitude,  plus an optional altitude (expressed in
 /// meters above sea level).
-public struct KMLCoordinate {
+public struct KMLCoordinate: Equatable {
     public var latitude: Double
     public var longitude: Double
     public var altitude: Double?
@@ -23,37 +25,56 @@ public struct KMLCoordinate {
     }
 }
 
-// MARK: CustomStringConvertible
-
-extension KMLCoordinate: CustomStringConvertible {
-    public var description: String {
-        if let altitude = altitude {
-            String(format: "%6f,%.6f,%.1f", longitude, latitude, altitude)
-        } else {
-            String(format: "%.6f,%.6f", longitude, latitude)
-        }
-    }
-}
-
 // MARK: - KMLValue
 
-struct CoordinateParseError: Error {}
+enum CoordinateParseError: Error, Equatable {
+    case incorrectComponentCount(String)
+    case noDoubleValue(String)
+    case emptyCoordinates
+}
 
 extension KMLCoordinate: KMLValue {
+    // TODO: replace with `.formatted(...)`
+    private static let formatter: NumberFormatter = {
+        let res = NumberFormatter()
+        res.minimumFractionDigits = 1
+        res.maximumFractionDigits = 6
+        return res
+    }()
+
     var kmlString: String {
-        description
+        let lonString = Self.formatter.string(from: NSNumber(value: longitude)) ?? "\(longitude)"
+        let latString = Self.formatter.string(from: NSNumber(value: latitude)) ?? "\(latitude)"
+        let altString = altitude.flatMap { Self.formatter.string(from: NSNumber(value: $0)) }
+        return [lonString, latString, altString].compactMap(\.self).joined(separator: ",")
     }
     
     init(kmlString: String) throws {
         let components = kmlString.components(separatedBy: ",")
 
-        guard components.count >= 2 else {
-            throw CoordinateParseError()
+        guard components.count == 2 || components.count == 3 else {
+            throw CoordinateParseError.incorrectComponentCount(kmlString)
         }
 
-        longitude = Double(components[0])!
-        latitude = Double(components[1])!
-        altitude = components.count > 2 ? Double(components[2]) : nil
+        guard let lon = Double(components[0]) else {
+            throw CoordinateParseError.noDoubleValue(components[0])
+        }
+        self.longitude = lon
+
+        guard let lat = Double(components[1]) else {
+            throw CoordinateParseError.noDoubleValue(components[1])
+        }
+        self.latitude = lat
+
+        if components.count == 3 {
+            if let alt = Double(components[2]) {
+                altitude = alt
+            } else {
+                throw CoordinateParseError.noDoubleValue(components[2])
+            }
+        } else {
+            altitude = nil
+        }
     }
 }
 
@@ -61,20 +82,23 @@ extension KMLCoordinate: KMLValue {
 
 extension Array: KMLValue where Element == KMLCoordinate {
     var kmlString: String {
-        map(\.description)
+        map(\.kmlString)
             .joined(separator: " ")
     }
 
     init(kmlString: String) throws {
-        let splits = kmlString.components(separatedBy: .whitespacesAndNewlines)
+        let splits = kmlString
+            .components(separatedBy: .whitespacesAndNewlines)
+            .filter { !$0.isEmpty }
 
-        let coords = splits.compactMap { str -> KMLCoordinate? in
-            try? KMLCoordinate(kmlString: str)
+        guard !splits.isEmpty else {
+            throw CoordinateParseError.emptyCoordinates
         }
 
-        if coords.isEmpty {
-            throw CoordinateParseError()
+        let coords = try splits.map { str -> KMLCoordinate in
+            try KMLCoordinate(kmlString: str)
         }
+
         self = coords
     }
 }

@@ -38,6 +38,10 @@ extension String: KMLValue {
     var kmlString: String { self }
 
     init(kmlString: String) throws {
+        guard !kmlString.isEmpty else {
+            throw KMLValueDecodeError(type: Self.self, value: kmlString)
+        }
+
         self = kmlString
     }
 }
@@ -70,10 +74,10 @@ extension Bool: KMLValue {
     var kmlString: String { self ? "1" : "0" }
 
     init(kmlString: String) throws {
-        if let boolVal = Bool(kmlString) {
-            self = boolVal
-        } else {
-            throw KMLValueDecodeError(type: Self.self, value: kmlString)
+        switch kmlString {
+        case "0": self = false
+        case "1": self = true
+        default: throw KMLValueDecodeError(type: Self.self, value: kmlString)
         }
     }
 }

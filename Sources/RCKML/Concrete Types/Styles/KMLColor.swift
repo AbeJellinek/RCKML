@@ -112,7 +112,7 @@ public extension KMLColor {
 // MARK: - KML Value Codable
 
 extension KMLColor: KMLValue {
-    enum Errors: Error {
+    enum Errors: Error, Equatable {
         case stringLength(String)
         case scannerFailure(String)
     }
@@ -131,20 +131,26 @@ extension KMLColor: KMLValue {
         let formattedString = kmlString
             .trimmingCharacters(in: .whitespacesAndNewlines)
             .uppercased()
-        let scanner = Scanner(string: formattedString)
-        var hexNumber: UInt64 = 0
-        let stringLength = formattedString.count
-
-        guard stringLength == 8 else {
+        
+        guard formattedString.count == 8 else {
             throw Errors.stringLength(formattedString)
         }
-        guard scanner.scanHexInt64(&hexNumber) else {
-            throw Errors.scannerFailure(formattedString)
+
+        // Inner function to get Double value for pair of characters starting at
+        // given index
+        func byte(_ index: Int) throws -> Double {
+            let start = formattedString.index(formattedString.startIndex, offsetBy: index)
+            let end = formattedString.index(start, offsetBy: 1)
+            let subString = formattedString[start...end]
+            guard let val = UInt8(subString, radix: 16) else {
+                throw Errors.scannerFailure(String(subString))
+            }
+            return Double(val) / 255.0
         }
 
-        alpha = Double((hexNumber & 0xFF000000) >> 24) / 255.0
-        blue = Double((hexNumber & 0x00FF0000) >> 16) / 255.0
-        green = Double((hexNumber & 0x0000FF00) >> 8) / 255.0
-        red = Double(hexNumber & 0x000000FF) / 255.0
+        alpha = try byte(0)
+        blue = try byte(2)
+        green = try byte(4)
+        red = try byte(6)
     }
 }
