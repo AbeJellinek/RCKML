@@ -48,7 +48,7 @@ extension KMLStyle: KMLDecodable {
     init(from decoder: KMLDecoder) throws {
         try decoder.verifyMatchesType(Self.self)
         id = decoder.idAttribute
-        lineStyle = try? decoder.child(of: KMLLineStyle.self)
-        polyStyle = try? decoder.child(of: KMLPolyStyle.self)
+        lineStyle = try? decoder.decode(KMLLineStyle.self)
+        polyStyle = try? decoder.decode(KMLPolyStyle.self)
     }
 }

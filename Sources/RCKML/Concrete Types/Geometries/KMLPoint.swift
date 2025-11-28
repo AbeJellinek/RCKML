@@ -37,7 +37,7 @@ extension KMLPoint: KMLDecodable {
     init(from decoder: KMLDecoder) throws {
         try decoder.verifyMatchesType(Self.self)
         id = decoder.idAttribute
-        coordinate = try decoder.value(of: KMLCoordinate.self, forKey: .coordinates)
+        coordinate = try decoder.decode(KMLCoordinate.self, forKey: .coordinates)
     }
 }
 

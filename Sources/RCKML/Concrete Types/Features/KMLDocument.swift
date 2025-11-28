@@ -111,11 +111,11 @@ extension KMLDocument: KMLDecodable {
     init(from decoder: KMLDecoder) throws {
         try decoder.verifyMatchesType(Self.self)
         id = decoder.idAttribute
-        name = try? decoder.value(of: String.self, forKey: .name)
-        featureDescription = try? decoder.value(of: String.self, forKey: .description)
+        name = try? decoder.decode(String.self, forKey: .name)
+        featureDescription = try? decoder.decode(String.self, forKey: .description)
 
-        features = try decoder.allChildren(of: AnyKMLFeature.self)
-        styles = try decoder.allChildren(of: AnyKMLStyleSelector.self)
+        features = try decoder.decode([AnyKMLFeature].self)
+        styles = try decoder.decode([AnyKMLStyleSelector].self)
     }
 
     public init(_ data: Data) throws {

@@ -47,8 +47,8 @@ extension KMLFolder: KMLDecodable {
     init(from decoder: KMLDecoder) throws {
         try decoder.verifyMatchesType(Self.self)
         id = decoder.idAttribute
-        name = try decoder.value(of: String.self, forKey: .name)
-        featureDescription = try decoder.value(of: String.self, forKey: .description)
-        features = try decoder.allChildren(of: AnyKMLFeature.self)
+        name = try decoder.decode(String.self, forKey: .name)
+        featureDescription = try decoder.decode(String.self, forKey: .description)
+        features = try decoder.decode([AnyKMLFeature].self)
     }
 }

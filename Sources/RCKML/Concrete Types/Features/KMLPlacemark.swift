@@ -81,13 +81,13 @@ extension KMLPlacemark: KMLDecodable {
     init(from decoder: KMLDecoder) throws {
         try decoder.verifyMatchesType(Self.self)
         id = decoder.idAttribute
-        name = try? decoder.value(of: String.self, forKey: .name)
-        featureDescription = try? decoder.value(of: String.self, forKey: .description)
+        name = try? decoder.decode(String.self, forKey: .name)
+        featureDescription = try? decoder.decode(String.self, forKey: .description)
 
-        style = try? decoder.child(of: AnyKMLStyle.self)
+        style = try? decoder.decode(AnyKMLStyle.self)
 
         // geometry:
-        let geometries = try decoder.allChildren(of: AnyKMLGeometry.self)
+        let geometries = try decoder.decode([AnyKMLGeometry].self)
         if geometries.count > 1 {
             throw GeometryCountError(count: geometries.count)
         }

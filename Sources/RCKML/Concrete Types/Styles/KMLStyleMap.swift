@@ -51,7 +51,7 @@ extension KMLStyleMap: KMLDecodable {
     init(from decoder: KMLDecoder) throws {
         try decoder.verifyMatchesType(Self.self)
         id = decoder.idAttribute
-        let pairs = try decoder.children(of: KMLStyleMap.Pair.self)
+        let pairs = try decoder.decode([KMLStyleMap.Pair].self)
         guard let primaryPair = pairs.first(where: { $0.key == .normal }) else {
             throw MissingPrimaryStyle()
         }
@@ -84,8 +84,8 @@ extension KMLStyleMap.Pair: KMLDecodable {
     init(from decoder: KMLDecoder) throws {
         try decoder.verifyMatchesType(Self.self)
         id = decoder.idAttribute
-        key = try decoder.value(of: StyleState.self, forKey: .pairKey)
-        content = try decoder.child(of: AnyKMLStyle.self)
+        key = try decoder.decode(StyleState.self, forKey: .pairKey)
+        content = try decoder.decode(AnyKMLStyle.self)
     }
 }
 

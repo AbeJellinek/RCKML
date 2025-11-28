@@ -41,7 +41,7 @@ extension KMLLineStyle: KMLDecodable {
     init(from decoder: KMLDecoder) throws {
         try decoder.verifyMatchesType(Self.self)
         id = decoder.idAttribute
-        width = decoder.value(of: Double.self, forKey: .width, default: 1.0)
-        color = try decoder.value(of: KMLColor.self, forKey: .color)
+        width = decoder.decode(Double.self, forKey: .width, default: 1.0)
+        color = try decoder.decode(KMLColor.self, forKey: .color)
     }
 }

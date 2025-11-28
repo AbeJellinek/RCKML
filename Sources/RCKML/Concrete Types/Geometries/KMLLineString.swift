@@ -31,7 +31,7 @@ extension KMLLineString: KMLDecodable {
     init(from decoder: KMLDecoder) throws {
         try decoder.verifyMatchesType(Self.self)
         id = decoder.idAttribute
-        coordinates = try decoder.value(of: [KMLCoordinate].self, forKey: .coordinates)
+        coordinates = try decoder.decode([KMLCoordinate].self, forKey: .coordinates)
     }
 }
 

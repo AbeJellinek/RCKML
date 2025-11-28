@@ -39,6 +39,6 @@ extension KMLMultiGeometry: KMLDecodable {
     init(from decoder: KMLDecoder) throws {
         try decoder.verifyMatchesType(Self.self)
         id = decoder.idAttribute
-        self.geometries = try decoder.allChildren(of: AnyKMLGeometry.self)
+        self.geometries = try decoder.decode([AnyKMLGeometry].self)
     }
 }

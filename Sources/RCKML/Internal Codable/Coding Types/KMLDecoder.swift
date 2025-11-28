@@ -82,10 +82,10 @@ struct KMLDecoder {
     /// // KMLDecoder wrapping the following element:
     /// // <Placemark><name>My Location</name></Placemark>
     ///
-    /// let placeName = try decoder.value(of: String.self, forKey: .name)
+    /// let placeName = try decoder.decode(String.self, forKey: .name)
     /// // placeName == "My Location"
     /// ```
-    func value<K: KMLValue>(of type: K.Type, forKey key: KMLTagName) throws -> K {
+    func decode<K: KMLValue>(_ type: K.Type, forKey key: KMLTagName) throws -> K {
         let item = xml[key.name]
         if let error = item.error {
             throw KMLDecoderError.xml(error)
@@ -116,14 +116,14 @@ struct KMLDecoder {
     /// // KMLDecoder wrapping the following element:
     /// // <Placemark><name>My Location</name></Placemark>
     ///
-    /// let placeName = try decoder.value(of: String.self, forKey: .name)
+    /// let placeName = try decoder.decode(String.self, forKey: .name)
     /// // placeName == "My Location"
     /// ```
-    func value<R: RawRepresentable>(
-        of type: R.Type,
+    func decode<R: RawRepresentable>(
+        _ type: R.Type,
         forKey key: KMLTagName
     ) throws -> R where R.RawValue: KMLValue {
-        let rawValue = try value(of: R.RawValue.self, forKey: key)
+        let rawValue = try decode(R.RawValue.self, forKey: key)
         guard let value = R(rawValue: rawValue) else {
             throw KMLDecoderError.rawValueDecodeFailed(expected: R.self)
         }
@@ -148,11 +148,15 @@ struct KMLDecoder {
     /// // KMLDecoder wrapping the following empty element:
     /// // <Placemark></Placemark>
     ///
-    /// let placeName = try decoder.value(of: String.self, forKey: .name, default: "No Name")
+    /// let placeName = try decoder.decode(String.self, forKey: .name, default: "No Name")
     /// // placeName == "No Name"
     /// ```
-    func value<K: KMLValue>(of type: K.Type, forKey key: KMLTagName, `default`: K) -> K {
-        if let value = try? value(of: type, forKey: key) {
+    func decode<K: KMLValue>(
+        _ type: K.Type,
+        forKey key: KMLTagName,
+        `default`: K
+    ) -> K {
+        if let value = try? decode(type, forKey: key) {
             return value
         } else {
             return `default`
@@ -177,10 +181,10 @@ struct KMLDecoder {
     /// // KMLDecoder wrapping the following element:
     /// // <Placemark><Point><coordinates>1,2,3</coordinates></Point></Placemark>
     ///
-    /// let pointGeometry = try decoder.child(of: Point.self)
+    /// let pointGeometry = try decoder.decode(Point.self)
     /// // pointGeometry is an instance of KMLPoint
     /// ```
-    func child<K: KMLDecodable>(of type: K.Type) throws -> K {
+    func decode<K: KMLDecodable>(_ type: K.Type) throws -> K {
         let child = xml[type.kmlTag]
         if let error = child.error {
             throw error
@@ -205,10 +209,10 @@ struct KMLDecoder {
     /// // KMLDecoder wrapping the following element:
     /// // <Placemark><Point><coordinates>1,2,3</coordinates></Point></Placemark>
     ///
-    /// let points = try decoder.children(of: Point.self)
+    /// let points = try decoder.decode([Point].self)
     /// // points is an array with a single instance of KMLPoint
     /// ```
-    func children<K: KMLDecodable>(of type: K.Type) throws -> [K] {
+    func decode<K: KMLDecodable>(_ type: [K].Type) throws -> [K] {
         try xml.children
             .filter { $0.name == K.kmlTag }
             .map { try K(from: KMLDecoder($0)) }
@@ -232,10 +236,10 @@ struct KMLDecoder {
     /// // KMLDecoder wrapping the following element:
     /// // <Placemark><Point><coordinates>1,2,3</coordinates></Point></Placemark>
     ///
-    /// let anyGeometry = try decoder.child(of: AnyKMLGeometry.self)
+    /// let anyGeometry = try decoder.decode(AnyKMLGeometry.self)
     /// // pointGeometry is AnyKMLGeometry.point(point)
     /// ```
-    func child<K: AnyDecodableKML>(of type: K.Type) throws -> K {
+    func decode<K: AnyDecodableKML>(_ type: K.Type) throws -> K {
         for aChild in xml.children {
             do {
                 let childDeocder = KMLDecoder(aChild)
@@ -264,10 +268,10 @@ struct KMLDecoder {
     /// // KMLDecoder wrapping the following element:
     /// // <Placemark><Point><coordinates>1,2,3</coordinates></Point></Placemark>
     ///
-    /// let geometries = try decoder.children(of: AnyKMLGeometry.self)
+    /// let geometries = try decoder.decode([AnyKMLGeometry].self)
     /// // geometries is an array with a single instance of AnyKMLGeometry.point(point)
     /// ```
-    func allChildren<K: AnyDecodableKML>(of type: K.Type) throws -> [K] {
+    func decode<K: AnyDecodableKML>(_ type: [K].Type) throws -> [K] {
         try xml.children
             .map(KMLDecoder.init)
             .compactMap { aDecoder in
@@ -300,9 +304,9 @@ struct KMLDecoder {
     /// </Polygon>
     /// ```
     ///
-    /// Use `subContainer(withName:)` to access the `innerBoundaryIs` element, which can
+    /// Use `decodeUntyped(named:)` to access the `innerBoundaryIs` element, which can
     /// then be used to access children of type `LinearRing`.
-    func subContainer(withName tag: KMLTagName) throws -> KMLDecoder {
+    func decodeUntyped(named tag: KMLTagName) throws -> KMLDecoder {
         let nested = xml[tag.name]
         if let error = nested.error {
             throw error

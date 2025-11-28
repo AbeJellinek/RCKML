@@ -85,9 +85,9 @@ extension AnyKMLStyle: AnyDecodableKML, AnyEncodableKML {
     struct MissingStyle: Error {}
 
     init(from decoder: KMLDecoder) throws {
-        if let style = try? decoder.child(of: KMLStyle.self) {
+        if let style = try? decoder.decode(KMLStyle.self) {
             self = .style(style)
-        } else if let styleUrl = try? decoder.value(of: KMLStyleUrl.self, forKey: .styleUrl) {
+        } else if let styleUrl = try? decoder.decode(KMLStyleUrl.self, forKey: .styleUrl) {
             self = .styleUrl(styleUrl)
         } else {
             throw MissingStyle()

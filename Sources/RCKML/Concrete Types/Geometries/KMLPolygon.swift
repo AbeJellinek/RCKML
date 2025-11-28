@@ -68,11 +68,11 @@ extension KMLPolygon: KMLDecodable {
         try container.verifyMatchesType(Self.self)
         id = container.idAttribute
 
-        let outerBoundaryContainer = try container.subContainer(withName: .outerBoundaryIs)
-        outerBoundaryIs = try outerBoundaryContainer.child(of: LinearRing.self)
+        let outerBoundaryContainer = try container.decodeUntyped(named: .outerBoundaryIs)
+        outerBoundaryIs = try outerBoundaryContainer.decode(LinearRing.self)
 
-        if let innerBoundsContainer = try? container.subContainer(withName: .innerBoundaryIs) {
-            let decodedInnerBounds = try innerBoundsContainer.children(of: LinearRing.self)
+        if let innerBoundsContainer = try? container.decodeUntyped(named: .innerBoundaryIs) {
+            let decodedInnerBounds = try innerBoundsContainer.decode([LinearRing].self)
             if !decodedInnerBounds.isEmpty {
                 innerBoundaryIs = decodedInnerBounds
             }
@@ -100,7 +100,7 @@ extension KMLPolygon.LinearRing: KMLDecodable {
     init(from container: KMLDecoder) throws {
         try container.verifyMatchesType(Self.self)
         id = container.idAttribute
-        coordinates = try container.value(of: [KMLCoordinate].self, forKey: .coordinates)
+        coordinates = try container.decode([KMLCoordinate].self, forKey: .coordinates)
     }
 }
 
