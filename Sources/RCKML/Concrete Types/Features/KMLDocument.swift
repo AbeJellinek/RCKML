@@ -174,7 +174,7 @@ extension KMLDocument {
         }
         switch aSelector {
         case .styleMap(let styleMap):
-            switch styleMap.content {
+            switch styleMap.normalStyle {
             case .styleUrl(let styleUrl):
                 return getStyleFromUrl(styleUrl)
             case .style(let mapStyle):

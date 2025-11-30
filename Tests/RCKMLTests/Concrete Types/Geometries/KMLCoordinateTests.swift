@@ -1,5 +1,5 @@
 //
-//  KMLCoordinateValueTests.swift
+//  KMLCoordinateTests.swift
 //  RCKML
 //
 //  Created by Ryan Linn on 11/28/25.
@@ -8,7 +8,7 @@
 @testable import RCKML
 import Testing
 
-struct KMLCoordinateValueTests {
+struct KMLCoordinateTests {
     @Test func stringToCoordinate() throws {
         let noAltitude = try KMLCoordinate(kmlString: "1.0,2.0")
         #expect(noAltitude.longitude == 1.0)

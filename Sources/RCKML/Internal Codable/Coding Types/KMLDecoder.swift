@@ -94,6 +94,42 @@ struct KMLDecoder {
         return typedValue
     }
     
+    /// Attempts to cast the decoder to a given basic value type.
+    ///
+    /// - Parameters:
+    ///   - type: They expected type to return.
+    ///   - key: An optional XML tag name that the decoder must match if given.
+    ///
+    /// - Returns: The decoded value.
+    ///
+    /// - Throws: Either `XMLTagMismatch` if there was a given key value that doesn't match the
+    /// decoder's tag name, or an error from attempting to initialize the `KMLValue` type with the decoder's
+    /// string value.
+    ///
+    /// Example:
+    ///
+    /// ```swift
+    /// // KMLDecoder wrapping the following element:
+    /// // <name>Item Name</name>
+    ///
+    /// let name = try decoder.as(String.self, forKey: .name)
+    /// // name == "Item Name"
+    ///
+    /// let anyString = try decoder.as(String.self)
+    /// // anyString == "Item Name"
+    ///
+    /// let failed = try decoder.as(String.self, forKey: .color)
+    /// // throws XMLTagMismatch error because `color` does not match `<name>`
+    /// ```
+    func `as`<K: KMLValue>(_ type: K.Type, forKey key: KMLTagName? = nil) throws -> K {
+        if let key,
+           xml.name != key.name
+        {
+            throw XMLTagMismatch(expectedTag: key.name, actualTag: xml.name)
+        }
+        return try K(kmlString: xml.string)
+    }
+
     /// Decodes a basic value from the decoder, using a `RawRepresentable` value that can be converted
     /// to `KMLValue`.
     ///
@@ -129,7 +165,45 @@ struct KMLDecoder {
         }
         return value
     }
-    
+
+    /// Attempts to cast the decoder to a given basic value type.
+    ///
+    /// - Parameters:
+    ///   - type: They expected type to return.
+    ///   - key: An optional XML tag name that the decoder must match if given.
+    ///
+    /// - Returns: The decoded value.
+    ///
+    /// - Throws: Either `XMLTagMismatch` if there was a given key value that doesn't match the
+    /// decoder's tag name, or an error from attempting to initialize the `KMLValue` type with the decoder's
+    /// string value.
+    ///
+    /// Example:
+    ///
+    /// ```swift
+    /// // KMLDecoder wrapping the following element:
+    /// // <name>Item Name</name>
+    ///
+    /// let name = try decoder.as(String.self, forKey: .name)
+    /// // name == "Item Name"
+    ///
+    /// let anyString = try decoder.as(String.self)
+    /// // anyString == "Item Name"
+    ///
+    /// let failed = try decoder.as(String.self, forKey: .color)
+    /// // throws XMLTagMismatch error because `color` does not match `<name>`
+    /// ```
+    func `as`<R: RawRepresentable>(
+        _ type: R.Type,
+        forKey key: KMLTagName? = nil
+    ) throws -> R where R.RawValue: KMLValue {
+        let rawValue = try self.as(R.RawValue.self, forKey: key)
+        guard let value = R(rawValue: rawValue) else {
+            throw KMLDecoderError.rawValueDecodeFailed(expected: R.self)
+        }
+        return value
+    }
+
     /// Decodes a basic value from the decoder, optionally returning a default value if the decoder fails..
     ///
     /// - Parameters:
@@ -245,7 +319,7 @@ struct KMLDecoder {
                 let childDeocder = KMLDecoder(aChild)
                 let result = try K.init(from: childDeocder)
                 return result
-            } catch is UnknownKMLType {
+            } catch is UnsupportedType {
                 // Unrecognized KML Type, just move on. Otherwise rethrow error.
             }
         }
@@ -277,7 +351,7 @@ struct KMLDecoder {
             .compactMap { aDecoder in
                 do {
                     return try K.init(from: aDecoder)
-                } catch is UnknownKMLType {
+                } catch is UnsupportedType {
                     // if error is unrecognized type, return nil
                     return nil
                 }

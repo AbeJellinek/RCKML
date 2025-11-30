@@ -42,7 +42,7 @@ extension KMLPolyStyle: KMLDecodable {
     init(from decoder: KMLDecoder) throws {
         try decoder.verifyMatchesType(Self.self)
         id = decoder.idAttribute
-        color = try decoder.decode(KMLColor.self, forKey: .color)
+        color = try? decoder.decode(KMLColor.self, forKey: .color)
         isFilled = decoder.decode(Bool.self, forKey: .isFilled, default: false)
         isOutlined = decoder.decode(Bool.self, forKey: .isOutlined, default: true)
     }

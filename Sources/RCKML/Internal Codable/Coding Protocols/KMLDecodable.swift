@@ -36,7 +36,7 @@ protocol AnyDecodableKML: AnyKML {
     ///
     /// Determine which case of this enum to initialize by comparing the `KMLDecoder` element's
     /// `tagName` to known `KMLObject` types' `kmlTag` properties. If `tagName` doesn't
-    /// match any known instances of this `AnyKML` type, throw an `UnknownKMLType` error to
+    /// match any known instances of this `AnyKML` type, throw an `UnsupportedType` error to
     /// indicate the decoder parent should move on from the element.
     ///
     /// See existing implementations for examples, such as `AnyKMLGeometry` or `AnyKMLFeature`.

@@ -1,5 +1,5 @@
 //
-//  KMLColorValueTests.swift
+//  KMLColorTests.swift
 //  RCKML
 //
 //  Created by Ryan Linn on 11/28/25.
@@ -8,7 +8,7 @@
 @testable import RCKML
 import Testing
 
-struct KMLColorValueTests {
+struct KMLColorTests {
     @Test func rgbaToKmlString() {
         let black = KMLColor(red: 0, green: 0, blue: 0, alpha: 1)
         #expect(black.kmlString.lowercased() == "ff000000")

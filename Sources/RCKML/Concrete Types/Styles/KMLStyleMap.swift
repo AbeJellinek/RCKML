@@ -13,26 +13,35 @@
 /// For definition, see [KML Spec](https://developers.google.com/kml/documentation/kmlreference#stylemap)
 public struct KMLStyleMap: KMLStyleSelector {
     public var id: String?
-    public var content: AnyKMLStyle
+    public var normalStyle: AnyKMLStyle
+    public var highlightStyle: AnyKMLStyle?
 
     public static var kmlTag: String {
         "StyleMap"
     }
 
-    public init(
-        id: String? = nil,
-        styleUrl: KMLStyleUrl
-    ) {
+    public init(id: String? = nil, normal: KMLStyleUrl, highlight: KMLStyleUrl?) {
         self.id = id
-        self.content = .styleUrl(styleUrl)
+        self.normalStyle = .styleUrl(normal)
+        self.highlightStyle = highlight.map { .styleUrl($0) }
     }
 
-    public init(
-        id: String? = nil,
-        style: KMLStyle
-    ) {
+    public init(id: String? = nil, normal: KMLStyleUrl, highlight: KMLStyle?) {
         self.id = id
-        self.content = .style(style)
+        self.normalStyle = .styleUrl(normal)
+        self.highlightStyle = highlight.map { .style($0) }
+    }
+
+    public init(id: String? = nil, normal: KMLStyle, highlight: KMLStyleUrl?) {
+        self.id = id
+        self.normalStyle = .style(normal)
+        self.highlightStyle = highlight.map { .styleUrl($0) }
+    }
+
+    public init(id: String? = nil, normal: KMLStyle, highlight: KMLStyle?) {
+        self.id = id
+        self.normalStyle = .style(normal)
+        self.highlightStyle = highlight.map { .style($0) }
     }
 }
 
@@ -40,8 +49,13 @@ public struct KMLStyleMap: KMLStyleSelector {
 
 extension KMLStyleMap: KMLEncodable {
     func encode(to encoder: KMLEncoder) throws {
-        let contentPair = Pair(key: .normal, content: content)
-        try encoder.encodeChild(contentPair)
+        let normalPair = Pair(key: .normal, content: normalStyle)
+        try encoder.encodeChild(normalPair)
+
+        if let highlightStyle  {
+            let highlightPair = Pair(key: .highlight, content: highlightStyle)
+            try encoder.encodeChild(highlightPair)
+        }
     }
 }
 
@@ -55,7 +69,11 @@ extension KMLStyleMap: KMLDecodable {
         guard let primaryPair = pairs.first(where: { $0.key == .normal }) else {
             throw MissingPrimaryStyle()
         }
-        content = primaryPair.content
+        normalStyle = primaryPair.content
+
+        if let highlightPair = pairs.first(where: { $0.key == .highlight }) {
+            highlightStyle = highlightPair.content
+        }
     }
 }
 

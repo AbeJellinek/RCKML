@@ -5,7 +5,7 @@
 //  Created by Ryan Linn on 11/17/25.
 //
 
-public struct UnknownKMLType: Error {}
+public struct UnsupportedType: Error {}
 
 /// An abstract protocol for enums where each case wraps a specific KML element.
 ///
@@ -15,5 +15,5 @@ public protocol AnyKML {
     
     var wrapped: Wrapped { get }
     
-    init(_ wrapped: Wrapped) throws(UnknownKMLType)
+    init(_ wrapped: Wrapped) throws(UnsupportedType)
 }
