@@ -1,8 +1,8 @@
 //
-//  KMLDecoder+TestInitializer.swift
+//  KMLDecoder+TestXML.swift
 //  RCKML
 //
-//  Created by Ryan Linn on 11/28/25.
+//  Created by Ryan Linn on 11/30/25.
 //
 
 import AEXML

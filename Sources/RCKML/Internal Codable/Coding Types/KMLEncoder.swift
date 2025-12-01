@@ -140,7 +140,9 @@ struct KMLEncoder {
         guard let object else {
             return
         }
-        try encodeChild(object)
+        let subEncoder = KMLEncoder(for: object)
+        try object.encode(to: subEncoder)
+        xml.addChild(subEncoder.xml)
     }
     
     /// Adds a child element representing any case of `AnyEncodableKML`, which will encode the child
