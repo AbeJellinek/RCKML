@@ -34,4 +34,23 @@ struct KMLStyleTests {
         #expect(style2.lineStyle == nil)
         #expect(style2.polyStyle == nil)
     }
+
+    @Test func encodeToXML() throws {
+        let lineStyle = KMLLineStyle(id: "lineStyle")
+        let polyStyle = KMLPolyStyle(id: "polyStyle")
+        let style = KMLStyle(id: "myStyle", lineStyle: lineStyle, polyStyle: polyStyle)
+        let encoder = try KMLEncoder(wrapping: style)
+
+        let xmlElement = encoder.xml
+        #expect(xmlElement.name == "Style")
+        #expect(xmlElement.attributes["id"] == "myStyle")
+
+        let lineStyleElements = xmlElement.children(named: "LineStyle")
+        #expect(lineStyleElements.count == 1)
+        #expect(lineStyleElements.first?.attributes["id"] == "lineStyle")
+
+        let polyStyleElements = xmlElement.children(named: "PolyStyle")
+        #expect(polyStyleElements.count == 1)
+        #expect(polyStyleElements.first?.attributes["id"] == "polyStyle")
+    }
 }

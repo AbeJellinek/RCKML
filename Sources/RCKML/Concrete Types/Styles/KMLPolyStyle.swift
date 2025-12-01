@@ -19,7 +19,7 @@ public struct KMLPolyStyle: KMLColorStyle {
     }
 
     public init(
-        id: String?,
+        id: String? = nil,
         isFilled: Bool = false,
         isOutlined: Bool = true,
         color: KMLColor? = nil
