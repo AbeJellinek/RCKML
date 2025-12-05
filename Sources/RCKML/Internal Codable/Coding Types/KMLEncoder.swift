@@ -77,11 +77,12 @@ struct KMLEncoder {
     
     /// Adds a named child element that can be used to hold sub elements.
     ///
-    /// - Parameter tag: The name of the XML element that will be created.
+    /// - Parameters:
+    ///   - tag:            The name of the XML element that will be created.
+    ///   - removeExisting: If true, and there is already a child element in this XML element with the
+    ///                     same name, this function call will erase the existing values with that name.
+    ///                     Otherwise, it will add a new container with the same name.
     /// - Returns: An encoder that contains the newly created child element.
-    ///
-    /// If there is already a child element in this XML element with the same name, this function will replace the
-    /// existing element.
     ///
     /// Example:
     ///
@@ -94,17 +95,19 @@ struct KMLEncoder {
     ///
     /// // After:
     /// // <Polygon>
-    /// // <InnerBoundaryIs>
-    /// // </InnerBoundaryIs>
+    /// // <innerBoundaryIs>
+    /// // </innerBoundaryIs>
     /// // </Polygon>
     ///
     /// // XML Element for 'container':
-    /// // <InnerBoundaryIs>
-    /// // </InnerBoundaryIs>
+    /// // <innerBoundaryIs>
+    /// // </innerBoundaryIs>
     /// ```
-    func encodeContainer(tag: KMLTagName) throws -> KMLEncoder {
+    func encodeContainer(tag: KMLTagName, removeExisting: Bool = false) throws -> KMLEncoder {
         // Remove existing container if already set
-        xml[tag.name].removeFromParent()
+        if removeExisting {
+            xml[tag.name].all?.forEach { $0.removeFromParent() }
+        }
 
         // Add new container element
         let element = AEXMLElement(name: tag.name)

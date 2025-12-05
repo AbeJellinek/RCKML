@@ -49,7 +49,15 @@ extension KMLPolygon {
         public init(
             id: String? = nil,
             coordinates: [KMLCoordinate]
-        ) {
+        ) throws(RequirementViolation) {
+            guard coordinates.count >= 4 else {
+                throw .tooFewCoordinates
+            }
+            guard coordinates.first == coordinates.last else {
+                throw .unclosedRing
+            }
+            // TODO: Require counterclockwise coordinates
+
             self.id = id
             self.coordinates = coordinates
         }
@@ -68,14 +76,18 @@ extension KMLPolygon: KMLDecodable {
         try container.verifyMatchesType(Self.self)
         id = container.idAttribute
 
-        let outerBoundaryContainer = try container.decodeUntyped(named: .outerBoundaryIs)
-        outerBoundaryIs = try outerBoundaryContainer.decode(LinearRing.self)
+        let outerBoundaryContainers = container.decodeUntyped(named: .outerBoundaryIs)
+        guard let outerBoundaryElement = outerBoundaryContainers.first else {
+            throw KMLDecoderError.childTypeNotFound(expected: "outerBoundaryIs")
+        }
+        outerBoundaryIs = try outerBoundaryElement.decode(LinearRing.self)
 
-        if let innerBoundsContainer = try? container.decodeUntyped(named: .innerBoundaryIs) {
-            let decodedInnerBounds = try innerBoundsContainer.decode([LinearRing].self)
-            if !decodedInnerBounds.isEmpty {
-                innerBoundaryIs = decodedInnerBounds
-            }
+        let innerBoundaryContainers = container.decodeUntyped(named: .innerBoundaryIs)
+        let innerBoundaries = try innerBoundaryContainers.map { container in
+            try container.decode(LinearRing.self)
+        }
+        if !innerBoundaries.isEmpty {
+            innerBoundaryIs = innerBoundaries
         }
     }
 }
@@ -86,11 +98,28 @@ extension KMLPolygon: KMLEncodable {
         try outerBoundaryContainer.encodeChild(outerBoundaryIs)
 
         if let innerBoundaryIs, !innerBoundaryIs.isEmpty {
-            let innerBoundaryContainer = try encoder.encodeContainer(tag: .innerBoundaryIs)
             for innerRing in innerBoundaryIs {
+                let innerBoundaryContainer = try encoder.encodeContainer(tag: .innerBoundaryIs)
                 try innerBoundaryContainer.encodeChild(innerRing)
             }
         }
+    }
+}
+
+// MARK: - LinearRing Requirement Violations
+
+extension KMLPolygon.LinearRing {
+    public enum RequirementViolation: Error {
+        /// LinearRing requires 4 or more coordinates
+        case tooFewCoordinates
+
+        /// LinearRing requires that first and last coordinate are equal
+        case unclosedRing
+
+        /// Polygon requires that LinearRing coordinates are laid out counterclockwise
+        ///
+        /// This requirement is not currently implemented in this library.
+        case clockwiseCoordinates
     }
 }
 
@@ -99,8 +128,9 @@ extension KMLPolygon: KMLEncodable {
 extension KMLPolygon.LinearRing: KMLDecodable {
     init(from container: KMLDecoder) throws {
         try container.verifyMatchesType(Self.self)
-        id = container.idAttribute
-        coordinates = try container.decode([KMLCoordinate].self, forKey: .coordinates)
+        let id = container.idAttribute
+        let coordinates = try container.decode([KMLCoordinate].self, forKey: .coordinates)
+        try self.init(id: id, coordinates: coordinates)
     }
 }
 

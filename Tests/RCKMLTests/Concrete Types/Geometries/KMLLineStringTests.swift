@@ -31,4 +31,23 @@ struct KMLLineStringTests {
             let _ = try decoder.decode(KMLLineString.self)
         }
     }
+
+    @Test func encodeWithIdAndCoordinates() throws {
+        let coordinates = [
+            KMLCoordinate(latitude: 2.0, longitude: 1.0),
+            KMLCoordinate(latitude: 4.0, longitude: 3.0)
+        ]
+        let lineString = KMLLineString(id: "LineString1", coordinates: coordinates)
+        let encoder = try KMLEncoder(wrapping: lineString)
+
+        let xmlElement = encoder.xml
+        #expect(xmlElement.name == "LineString")
+        #expect(xmlElement.attributes["id"] == "LineString1")
+
+        let coordinatesElements = xmlElement.children(named: "coordinates")
+        #expect(coordinatesElements.count == 1)
+        let coordinatesText = coordinatesElements.first?.string
+
+        #expect(coordinatesText == "1.0,2.0 3.0,4.0")
+    }
 }

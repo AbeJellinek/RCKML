@@ -358,13 +358,11 @@ struct KMLDecoder {
             }
     }
     
-    /// Attempts to decode an untyped child element from the child elements of this decoder.
+    /// Attempts to decode all untyped child elements of the decoder matching the given name.
     ///
     /// - Parameter tag: The name of the expected child element
     ///
-    /// - Returns: An untyped `KMLDecoder` wrapping the child element.
-    ///
-    /// - Throws: If no element with the given name can be found.
+    /// - Returns: An array of untyped `KMLDecoder`s wrapping the child element.
     ///
     /// Use this function only for elements that should contain other sub-elements, but have no other KML
     /// type requirements. For example, given the following element:
@@ -373,19 +371,18 @@ struct KMLDecoder {
     /// <Polygon>
     /// <innerBoundaryIs>
     /// <LinearRing></LinearRing>
-    /// <LinearRing></LinearRing>
     /// </innerBoundaryIs>
+    /// <innerBoundaryIs>
+    /// <LinearRing></LinearRing>
+    /// <innerBoundaryIs>
     /// </Polygon>
     /// ```
     ///
-    /// Use `decodeUntyped(named:)` to access the `innerBoundaryIs` element, which can
+    /// Use `decodeUntyped(named:)` to access the `innerBoundaryIs` elements, which can
     /// then be used to access children of type `LinearRing`.
-    func decodeUntyped(named tag: KMLTagName) throws -> KMLDecoder {
-        let nested = xml[tag.name]
-        if let error = nested.error {
-            throw error
-        }
-        let container = KMLDecoder(nested)
-        return container
+    func decodeUntyped(named tag: KMLTagName) -> [KMLDecoder] {
+        xml.children
+            .filter { $0.name == tag.name }
+            .map { KMLDecoder($0) }
     }
 }

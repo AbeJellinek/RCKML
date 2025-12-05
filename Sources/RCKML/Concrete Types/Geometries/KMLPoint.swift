@@ -16,7 +16,8 @@ public struct KMLPoint: KMLGeometry {
         "Point"
     }
 
-    public init(coordinate: KMLCoordinate) {
+    public init(id: String? = nil, coordinate: KMLCoordinate) {
+        self.id = id
         self.coordinate = coordinate
     }
 

@@ -41,4 +41,34 @@ struct KMLPointTests {
             let _ = try withoutCoordinates.decode(KMLPoint.self)
         }
     }
+
+    @Test func encodeWithAltitude() throws {
+        let coordinate = KMLCoordinate(latitude: 2.0, longitude: 1.0, altitude: 3.0)
+        let point = KMLPoint(id: "Point1", coordinate: coordinate)
+        let encoder = try KMLEncoder(wrapping: point)
+
+        let xmlElement = encoder.xml
+        #expect(xmlElement.name == "Point")
+        #expect(xmlElement.attributes["id"] == "Point1")
+
+        let coordinateElements = xmlElement.children(named: "coordinates")
+        #expect(coordinateElements.count == 1)
+        let coordinatesText = coordinateElements.first?.string
+        #expect(coordinatesText == "1.0,2.0,3.0")
+    }
+
+    @Test func encodeWithoutAltitude() throws {
+        let coordinate = KMLCoordinate(latitude: 2.0, longitude: 1.0)
+        let point = KMLPoint(coordinate: coordinate)
+        let encoder = try KMLEncoder(wrapping: point)
+
+        let xmlElement = encoder.xml
+        #expect(xmlElement.name == "Point")
+        #expect(xmlElement.attributes["id"] == nil)
+
+        let coordinateElements = xmlElement.children(named: "coordinates")
+        #expect(coordinateElements.count == 1)
+        let coordinatesText = coordinateElements.first?.string
+        #expect(coordinatesText == "1.0,2.0")
+    }
 }
