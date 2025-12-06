@@ -16,12 +16,25 @@ public struct KMLMultiGeometry: KMLGeometry {
         "MultiGeometry"
     }
 
+    public init(id: String? = nil) {
+        self.id = id
+        self.geometries = []
+    }
+
     public init(
         id: String? = nil,
         geometries: [AnyKMLGeometry]
     ) {
         self.id = id
         self.geometries = geometries
+    }
+
+    public init(
+        id: String? = nil,
+        geometries: [any KMLGeometry]
+    ) throws {
+        self.id = id
+        self.geometries = try geometries.map(AnyKMLGeometry.init)
     }
 }
 

@@ -20,28 +20,40 @@ public struct KMLStyleMap: KMLStyleSelector {
         "StyleMap"
     }
 
-    public init(id: String? = nil, normal: KMLStyleUrl, highlight: KMLStyleUrl?) {
+    public init(id: String? = nil, normal: KMLStyleUrl) {
         self.id = id
         self.normalStyle = .styleUrl(normal)
-        self.highlightStyle = highlight.map { .styleUrl($0) }
+        self.highlightStyle = nil
     }
 
-    public init(id: String? = nil, normal: KMLStyleUrl, highlight: KMLStyle?) {
+    public init(id: String? = nil, normal: KMLStyle) {
+        self.id = id
+        self.normalStyle = .style(normal)
+        self.highlightStyle = nil
+    }
+
+    public init(id: String? = nil, normal: KMLStyleUrl, highlight: KMLStyleUrl) {
         self.id = id
         self.normalStyle = .styleUrl(normal)
-        self.highlightStyle = highlight.map { .style($0) }
+        self.highlightStyle = .styleUrl(highlight)
     }
 
-    public init(id: String? = nil, normal: KMLStyle, highlight: KMLStyleUrl?) {
+    public init(id: String? = nil, normal: KMLStyleUrl, highlight: KMLStyle) {
         self.id = id
-        self.normalStyle = .style(normal)
-        self.highlightStyle = highlight.map { .styleUrl($0) }
+        self.normalStyle = .styleUrl(normal)
+        self.highlightStyle = .style(highlight)
     }
 
-    public init(id: String? = nil, normal: KMLStyle, highlight: KMLStyle?) {
+    public init(id: String? = nil, normal: KMLStyle, highlight: KMLStyleUrl) {
         self.id = id
         self.normalStyle = .style(normal)
-        self.highlightStyle = highlight.map { .style($0) }
+        self.highlightStyle = .styleUrl(highlight)
+    }
+
+    public init(id: String? = nil, normal: KMLStyle, highlight: KMLStyle) {
+        self.id = id
+        self.normalStyle = .style(normal)
+        self.highlightStyle = .style(highlight)
     }
 }
 
