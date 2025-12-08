@@ -51,9 +51,8 @@ struct KMLPointTests {
         #expect(xmlElement.name == "Point")
         #expect(xmlElement.attributes["id"] == "Point1")
 
-        let coordinateElements = xmlElement.children(named: "coordinates")
-        #expect(coordinateElements.count == 1)
-        let coordinatesText = coordinateElements.first?.string
+        let coordinateElement = try xmlElement.exactlyOneChild(named: "coordinates")
+        let coordinatesText = coordinateElement.string
         #expect(coordinatesText == "1.0,2.0,3.0")
     }
 
@@ -66,9 +65,8 @@ struct KMLPointTests {
         #expect(xmlElement.name == "Point")
         #expect(xmlElement.attributes["id"] == nil)
 
-        let coordinateElements = xmlElement.children(named: "coordinates")
-        #expect(coordinateElements.count == 1)
-        let coordinatesText = coordinateElements.first?.string
+        let coordinateElement = try xmlElement.exactlyOneChild(named: "coordinates")
+        let coordinatesText = coordinateElement.string
         #expect(coordinatesText == "1.0,2.0")
     }
 }

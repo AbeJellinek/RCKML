@@ -92,9 +92,8 @@ struct KMLPolygonTests {
         #expect(xmlElement.name == "LinearRing")
         #expect(xmlElement.attributes["id"] == "ring")
 
-        let coordinatesElements = xmlElement.children(named: "coordinates")
-        #expect(coordinatesElements.count == 1)
-        let coordinatesText = coordinatesElements.first?.string
+        let coordinatesElement = try xmlElement.exactlyOneChild(named: "coordinates")
+        let coordinatesText = coordinatesElement.string
 
         #expect(coordinatesText == Rings.outer)
     }
@@ -259,30 +258,24 @@ struct KMLPolygonTests {
         #expect(polygonXml.attributes["id"] == "wholePoly")
 
         // outerBoundaryIs
-        let outerBoundaryXmls = polygonXml.children(named: "outerBoundaryIs")
-        #expect(outerBoundaryXmls.count == 1)
-        let outerBoundaryIsElement = try #require(outerBoundaryXmls.first)
+        let outerBoundary = try polygonXml.exactlyOneChild(named: "outerBoundaryIs")
         // -- LinearRing
-        let outerLineRingXmls = outerBoundaryIsElement.children(named: "LinearRing")
-        #expect(outerLineRingXmls.count == 1)
-        let outerLineRingElement = try #require(outerLineRingXmls.first)
+        let outerLineRing = try outerBoundary.exactlyOneChild(named: "LinearRing")
         // ---- coordinates
-        let coordinatesXmls = outerLineRingElement.children(named: "coordinates")
-        #expect(coordinatesXmls.count == 1)
-        let coordinateElement = try #require(coordinatesXmls.first)
+        let coordinatesElement = try outerLineRing.exactlyOneChild(named: "coordinates")
         // ------ coordinates text value
-        #expect(coordinateElement.string == Rings.outer)
+        #expect(coordinatesElement.string == Rings.outer)
 
         // innerBoundaries
-        let innerBoundaryXmls = polygonXml.children(named: "innerBoundaryIs")
-        #expect(innerBoundaryXmls.count == 2)
+        let innerBoundaries = polygonXml.children(named: "innerBoundaryIs")
+        #expect(innerBoundaries.count == 2)
 
         // InnerBoundaryIs1
-        let inner1Xml = try #require(innerBoundaryXmls.first { $0["LinearRing"].attributes["id"] == "inner1" })
+        let inner1Xml = try #require(innerBoundaries.first { $0["LinearRing"].attributes["id"] == "inner1" })
         #expect(inner1Xml["LinearRing"]["coordinates"].value == Rings.inner1)
 
         // InnerBoundaryIs2
-        let inner2Xml = try #require(innerBoundaryXmls.first { $0["LinearRing"].attributes["id"] == "inner2" })
+        let inner2Xml = try #require(innerBoundaries.first { $0["LinearRing"].attributes["id"] == "inner2" })
         #expect(inner2Xml["LinearRing"]["coordinates"].value == Rings.inner2)
     }
 }

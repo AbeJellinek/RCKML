@@ -45,12 +45,10 @@ struct KMLStyleTests {
         #expect(xmlElement.name == "Style")
         #expect(xmlElement.attributes["id"] == "myStyle")
 
-        let lineStyleElements = xmlElement.children(named: "LineStyle")
-        #expect(lineStyleElements.count == 1)
-        #expect(lineStyleElements.first?.attributes["id"] == "lineStyle")
+        let lineStyleElement = try xmlElement.exactlyOneChild(named: "LineStyle")
+        #expect(lineStyleElement.attributes["id"] == "lineStyle")
 
-        let polyStyleElements = xmlElement.children(named: "PolyStyle")
-        #expect(polyStyleElements.count == 1)
-        #expect(polyStyleElements.first?.attributes["id"] == "polyStyle")
+        let polyStyleElement = try xmlElement.exactlyOneChild(named: "PolyStyle")
+        #expect(polyStyleElement.attributes["id"] == "polyStyle")
     }
 }

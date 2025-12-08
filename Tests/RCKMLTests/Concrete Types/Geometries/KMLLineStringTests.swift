@@ -44,9 +44,8 @@ struct KMLLineStringTests {
         #expect(xmlElement.name == "LineString")
         #expect(xmlElement.attributes["id"] == "LineString1")
 
-        let coordinatesElements = xmlElement.children(named: "coordinates")
-        #expect(coordinatesElements.count == 1)
-        let coordinatesText = coordinatesElements.first?.string
+        let coordinatesElement = try xmlElement.exactlyOneChild(named: "coordinates")
+        let coordinatesText = coordinatesElement.string
 
         #expect(coordinatesText == "1.0,2.0 3.0,4.0")
     }

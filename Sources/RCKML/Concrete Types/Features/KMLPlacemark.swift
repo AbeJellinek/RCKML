@@ -13,7 +13,8 @@ public struct KMLPlacemark: KMLFeature {
     public var id: String?
     public var name: String?
     public var featureDescription: String?
-    public var geometry: AnyKMLGeometry
+    public var geometry: AnyKMLGeometry?
+    // TODO: also allow StyleMap
     public var style: AnyKMLStyle?
 
     public static var kmlTag: String {
@@ -22,9 +23,9 @@ public struct KMLPlacemark: KMLFeature {
 
     public init(
         id: String? = nil,
-        name: String,
+        name: String?,
         featureDescription: String? = nil,
-        geometry: AnyKMLGeometry,
+        geometry: AnyKMLGeometry?,
         styleUrl: KMLStyleUrl
     ) {
         self.id = id
@@ -36,9 +37,9 @@ public struct KMLPlacemark: KMLFeature {
 
     public init(
         id: String? = nil,
-        name: String,
+        name: String?,
         featureDescription: String? = nil,
-        geometry: AnyKMLGeometry,
+        geometry: AnyKMLGeometry?,
         style: KMLStyle
     ) {
         self.id = id
@@ -50,9 +51,9 @@ public struct KMLPlacemark: KMLFeature {
 
     public init(
         id: String? = nil,
-        name: String,
+        name: String?,
         featureDescription: String? = nil,
-        geometry: AnyKMLGeometry
+        geometry: AnyKMLGeometry?
     ) {
         self.id = id
         self.name = name
@@ -74,7 +75,7 @@ extension KMLPlacemark: KMLEncodable {
 }
 
 extension KMLPlacemark: KMLDecodable {
-    struct GeometryCountError: Error {
+    struct GeometryCountError: Error, Equatable {
         var count: Int
     }
 
@@ -91,9 +92,6 @@ extension KMLPlacemark: KMLDecodable {
         if geometries.count > 1 {
             throw GeometryCountError(count: geometries.count)
         }
-        guard let geometry = geometries.first else {
-            throw GeometryCountError(count: geometries.count)
-        }
-        self.geometry = geometry
+        self.geometry = geometries.first
     }
 }

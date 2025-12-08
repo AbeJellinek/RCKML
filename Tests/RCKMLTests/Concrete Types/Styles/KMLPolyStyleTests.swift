@@ -43,16 +43,13 @@ struct KMLPolyStyleTests {
         #expect(xmlElement.name == "PolyStyle")
         #expect(xmlElement.attributes["id"] == "myStyle")
 
-        let fillElements = xmlElement.children(named: "fill")
-        #expect(fillElements.count == 1)
-        #expect(fillElements.first?.bool == false)
+        let fillElement = try xmlElement.exactlyOneChild(named: "fill")
+        #expect(fillElement.bool == false)
 
-        let outlineElements = xmlElement.children(named: "outline")
-        #expect(outlineElements.count == 1)
-        #expect(outlineElements.first?.bool == true)
+        let outlineElement = try xmlElement.exactlyOneChild(named: "outline")
+        #expect(outlineElement.bool == true)
 
-        let colorElements = xmlElement.children(named: "color")
-        #expect(colorElements.count == 1)
-        #expect(colorElements.first?.value == "FF0000FF")
+        let colorElement = try xmlElement.exactlyOneChild(named: "color")
+        #expect(colorElement.value == "FF0000FF")
     }
 }

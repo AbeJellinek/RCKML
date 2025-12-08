@@ -104,8 +104,7 @@ struct AnyGeometryTests {
 
         let xmlElement = encoder.xml
         #expect(xmlElement.name == "Point")
-        #expect(xmlElement.children.count == 1)
-        #expect(xmlElement["coordinates"].error == nil)
+        _ = try xmlElement.exactlyOneChild(named: "coordinates")
     }
 
     @Test func encodeLineString() throws {
@@ -115,8 +114,7 @@ struct AnyGeometryTests {
 
         let xmlElement = encoder.xml
         #expect(xmlElement.name == "LineString")
-        #expect(xmlElement.children.count == 1)
-        #expect(xmlElement["coordinates"].error == nil)
+        _ = try xmlElement.exactlyOneChild(named: "coordinates")
     }
 
     @Test func encodePolygon() throws {
@@ -127,8 +125,7 @@ struct AnyGeometryTests {
 
         let xmlElement = encoder.xml
         #expect(xmlElement.name == "Polygon")
-        #expect(xmlElement.children.count == 1)
-        #expect(xmlElement["outerBoundaryIs"].error == nil)
+        _ = try xmlElement.exactlyOneChild(named: "outerBoundaryIs")
     }
 
     @Test func encodeMultiGeometry() throws {

@@ -40,12 +40,10 @@ struct KMLLineStyleTests {
         #expect(xmlElement.name == "LineStyle")
         #expect(xmlElement.attributes["id"] == "myStyle")
 
-        let widthElements = xmlElement.children(named: "width")
-        #expect(widthElements.count == 1)
-        #expect(widthElements.first?.double == 4.0)
+        let widthElement = try xmlElement.exactlyOneChild(named: "width")
+        #expect(widthElement.double == 4.0)
 
-        let colorElements = xmlElement.children(named: "color")
-        #expect(colorElements.count == 1)
-        #expect(colorElements.first?.value == "FF0000FF")
+        let colorElement = try xmlElement.exactlyOneChild(named: "color")
+        #expect(colorElement.value == "FF0000FF")
     }
 }

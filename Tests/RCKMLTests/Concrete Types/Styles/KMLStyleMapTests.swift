@@ -118,13 +118,11 @@ struct KMLStyleMapTests {
         let pairs = xmlElement.children(named: "Pair")
         #expect(pairs.count == 2)
         let normalPair = try #require(pairs.first(where: { $0["key"].value == "normal" }))
-        let normalStyles = normalPair.children(named: "Style")
-        #expect(normalStyles.count == 1)
-        #expect(normalStyles.first?.attributes["id"] == "style1")
+        let normalStyle = try normalPair.exactlyOneChild(named: "Style")
+        #expect(normalStyle.attributes["id"] == "style1")
 
         let highlightPair = try #require(pairs.first(where: { $0["key"].value == "highlight" }))
-        let highlightStyles = highlightPair.children(named: "Style")
-        #expect(highlightStyles.count == 1)
-        #expect(highlightStyles.first?.attributes["id"] == "style2")
+        let highlightStyle = try highlightPair.exactlyOneChild(named: "Style")
+        #expect(highlightStyle.attributes["id"] == "style2")
     }
 }

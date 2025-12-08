@@ -30,7 +30,7 @@ extension KMLEncoder {
         switch object.encodable {
         case .object(let encodableObject):
             child = temp.xml[type(of: encodableObject).kmlTag]
-        case .value(let name, let value):
+        case .value(let name, _):
             child = temp.xml[name.name]
         }
         if let error = child.error {
