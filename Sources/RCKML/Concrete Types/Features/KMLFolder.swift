@@ -29,6 +29,18 @@ public struct KMLFolder: KMLFeature, KMLContainer {
         self.featureDescription = featureDescription
         self.features = features
     }
+
+    public init(
+        id: String? = nil,
+        name: String? = nil,
+        featureDescription: String? = nil,
+        features: [any KMLFeature]
+    ) throws {
+        self.id = id
+        self.name = name
+        self.featureDescription = featureDescription
+        self.features = try features.map(AnyKMLFeature.init)
+    }
 }
 
 // MARK: - KML Coding
@@ -48,7 +60,7 @@ extension KMLFolder: KMLDecodable {
         try decoder.verifyMatchesType(Self.self)
         id = decoder.idAttribute
         name = try decoder.decode(String.self, forKey: .name)
-        featureDescription = try decoder.decode(String.self, forKey: .description)
+        featureDescription = try? decoder.decode(String.self, forKey: .description)
         features = try decoder.decode([AnyKMLFeature].self)
     }
 }

@@ -108,22 +108,52 @@ struct KMLPlacemarkTests {
     }
 
     @Test func encodeWithPoint() throws {
-        // no style, point geometry
-        Issue.record("Not implemented")
+        let point = KMLPoint(id: "aPoint", latitude: 0, longitude: 0)
+        let placemark = KMLPlacemark(name: nil, geometry: .point(point))
+        let encoder = try KMLEncoder(wrapping: placemark)
+
+        let xmlElement = encoder.xml
+        let pointElement = try xmlElement.exactlyOneChild(named: "Point")
+        #expect(pointElement.attributes["id"] == "aPoint")
     }
 
     @Test func encodeWithLineString() throws {
-        // no style, lineString geometry
-        Issue.record("Not implemented")
+        let lineString = KMLLineString(id: "aLine", coordinates: [
+            KMLCoordinate(latitude: 0, longitude: 0),
+            KMLCoordinate(latitude: 1, longitude: 1)
+        ])
+        let placemark = KMLPlacemark(name: nil, geometry: .lineString(lineString))
+        let encoder = try KMLEncoder(wrapping: placemark)
+
+        let xmlElement = encoder.xml
+        let lineStringElement = try xmlElement.exactlyOneChild(named: "LineString")
+        #expect(lineStringElement.attributes["id"] == "aLine")
     }
 
     @Test func encodeWithPolygon() throws {
         // no style, polygon geometry
-        Issue.record("Not implemented")
+        let outerBound = try KMLPolygon.LinearRing(coordinates: [
+            KMLCoordinate(latitude: 0, longitude: 0),
+            KMLCoordinate(latitude: 0, longitude: 1),
+            KMLCoordinate(latitude: 1, longitude: 1),
+            KMLCoordinate(latitude: 0, longitude: 0)
+        ])
+        let polygon = KMLPolygon(id: "aPolygon", outerBoundary: outerBound)
+        let placemark = KMLPlacemark(name: nil, geometry: .polygon(polygon))
+        let encoder = try KMLEncoder(wrapping: placemark)
+
+        let xmlElement = encoder.xml
+        let polygonElement = try xmlElement.exactlyOneChild(named: "Polygon")
+        #expect(polygonElement.attributes["id"] == "aPolygon")
     }
 
     @Test func encodeWithMultiGeometry() throws {
-        // no style, multigeometry
-        Issue.record("Not implemented")
+        let multiGeo = KMLMultiGeometry(id: "aMulti")
+        let placemark = KMLPlacemark(name: nil, geometry: .multiGeometry(multiGeo))
+        let encoder = try KMLEncoder(wrapping: placemark)
+
+        let xmlElement = encoder.xml
+        let multiGeoElement = try xmlElement.exactlyOneChild(named: "MultiGeometry")
+        #expect(multiGeoElement.attributes["id"] == "aMulti")
     }
 }
