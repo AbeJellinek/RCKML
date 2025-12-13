@@ -5,6 +5,7 @@
 //  Created by Ryan Linn on 12/6/25.
 //
 
+import Foundation
 import RCKML
 
 extension KMLCoordinate {
@@ -48,6 +49,20 @@ extension KMLPlacemark {
         name: String = "Polygon Sample"
     ) -> KMLPlacemark {
         KMLPlacemark(id: id, name: name, geometry: .polygon(.sample))
+    }
+}
+
+struct FileNotFound: Error {}
+
+extension KMLFile {
+    static var sampleFileUrl: URL {
+        get throws {
+            if let url = Bundle.module.url(forResource: "GoogleSample", withExtension: "kml") {
+                return url
+            } else {
+                throw FileNotFound()
+            }
+        }
     }
 }
 

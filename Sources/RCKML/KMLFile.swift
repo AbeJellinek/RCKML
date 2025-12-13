@@ -5,28 +5,52 @@
 //  Created by Ryan Linn on 12/12/25.
 //
 
-/*
+import AEXML
+import Foundation
+import ZIPFoundation
+
+public enum KMLFileError: Error {
+    case failedStringConversion
+    case kmzReadFailure
+    case kmzUnzipFailure
+    case kmzWriteFailure
+    case missingKmlRoot
+    case unknownFileExtension(String)
+}
+
 public struct KMLFile {
     public var features: [AnyKMLFeature]
 
+    public init(features: [AnyKMLFeature]? = nil) {
+        self.features = features ?? []
+    }
+
+    public init(features: [any KMLFeature]) throws {
+        self.features = try features.map(AnyKMLFeature.init)
+    }
+
     public init(_ data: Data) throws {
         let xmlDoc = try AEXMLDocument(xml: data)
-        guard let documentElement = xmlDoc.firstDescendant(where: { $0.name == Self.kmlTag }) else {
-            throw KMLDocumentError.missingDocumentRoot
+        let kmlElement = xmlDoc["kml"]
+        guard kmlElement.error == nil else {
+            throw KMLFileError.missingKmlRoot
         }
-        let decoder = KMLDecoder(documentElement)
-        try self.init(from: decoder)
+
+        let decoder = KMLDecoder(kmlElement)
+        self.features = try decoder.decode([AnyKMLFeature].self)
     }
 
     public init(kmzData: Data) throws {
-        var extractedData = Data()
         let archive = try Archive(data: kmzData, accessMode: .read, pathEncoding: .utf8)
 
-        guard let kmlEntry = archive.first(where: { $0.path.hasSuffix("kml") }),
-              let _ = try? archive.extract(kmlEntry, consumer: { extractedData += $0 }),
-              !extractedData.isEmpty
-        else {
-            throw KMLDocumentError.kmzReadError
+        guard let kmlEntry = archive.first(where: { $0.path.hasSuffix("kml") }) else {
+            throw KMLFileError.kmzReadFailure
+        }
+
+        var extractedData = Data()
+        let _ = try? archive.extract(kmlEntry, consumer: { extractedData += $0 })
+        guard  !extractedData.isEmpty else {
+            throw KMLFileError.kmzUnzipFailure
         }
 
         try self.init(extractedData)
@@ -34,7 +58,7 @@ public struct KMLFile {
 
     public init(_ kmlString: String) throws {
         guard let data = kmlString.data(using: .utf8) else {
-            throw KMLDocumentError.failedStringConversion
+            throw KMLFileError.failedStringConversion
         }
         try self.init(data)
     }
@@ -49,7 +73,7 @@ public struct KMLFile {
         case "kmz":
             try self.init(kmzData: data)
         default:
-            throw KMLDocumentError.unknownFileExtension(url.pathExtension)
+            throw KMLFileError.unknownFileExtension(url.pathExtension)
         }
     }
 
@@ -61,7 +85,9 @@ public struct KMLFile {
         let kmlRoot = xmlDoc.addChild(name: "kml", attributes: baseAttributes)
 
         let encoder = KMLEncoder(kmlRoot)
-        try encoder.encodeChild(self)
+        for feature in features {
+            try encoder.encodeChild(feature)
+        }
 
         return xmlDoc.xml
     }
@@ -69,7 +95,7 @@ public struct KMLFile {
     /// Returns the file data representation of the KML file.
     public func kmlData() throws -> Data {
         guard let result = try kmlString().data(using: .utf8) else {
-            throw KMLDocumentError.failedStringConversion
+            throw KMLFileError.failedStringConversion
         }
         return result
     }
@@ -91,18 +117,8 @@ public struct KMLFile {
             })
 
         guard let result = archive.data else {
-            throw KMLDocumentError.kmzWriteError
+            throw KMLFileError.kmzWriteFailure
         }
         return result
     }
-
 }
-
-enum KMLDocumentError: Error {
-    case failedStringConversion
-    case kmzReadError
-    case kmzWriteError
-    case missingDocumentRoot
-    case unknownFileExtension(String)
-}
-*/
