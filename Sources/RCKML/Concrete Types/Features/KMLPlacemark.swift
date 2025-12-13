@@ -14,8 +14,7 @@ public struct KMLPlacemark: KMLFeature {
     public var name: String?
     public var featureDescription: String?
     public var geometry: AnyKMLGeometry?
-    // TODO: also allow StyleMap
-    public var style: AnyKMLStyle?
+    public var style: AnyPlacemarkStyle?
 
     public static var kmlTag: String {
         "Placemark"
@@ -53,6 +52,20 @@ public struct KMLPlacemark: KMLFeature {
         id: String? = nil,
         name: String?,
         featureDescription: String? = nil,
+        geometry: AnyKMLGeometry?,
+        styleMap: KMLStyleMap
+    ) {
+        self.id = id
+        self.name = name
+        self.featureDescription = featureDescription
+        self.geometry = geometry
+        self.style = .styleMap(styleMap)
+    }
+
+    public init(
+        id: String? = nil,
+        name: String?,
+        featureDescription: String? = nil,
         geometry: AnyKMLGeometry?
     ) {
         self.id = id
@@ -60,6 +73,40 @@ public struct KMLPlacemark: KMLFeature {
         self.featureDescription = featureDescription
         self.geometry = geometry
         self.style = nil
+    }
+}
+
+// MARK: - Placemark Style
+
+extension KMLPlacemark {
+    public enum AnyPlacemarkStyle: AnyKML {
+        case styleMap(KMLStyleMap)
+        case style(KMLStyle)
+        case styleUrl(KMLStyleUrl)
+
+        public var wrapped: Any {
+            switch self {
+            case .styleMap(let map):
+                map
+            case .style(let style):
+                style
+            case .styleUrl(let url):
+                url
+            }
+        }
+
+        public init(_ wrapped: Any) throws(UnsupportedType) {
+            switch wrapped {
+            case let styleUrl as KMLStyleUrl:
+                self = .styleUrl(styleUrl)
+            case let style as KMLStyle:
+                self = .style(style)
+            case let map as KMLStyleMap:
+                self = .styleMap(map)
+            default:
+                throw UnsupportedType()
+            }
+        }
     }
 }
 
@@ -85,7 +132,7 @@ extension KMLPlacemark: KMLDecodable {
         name = try? decoder.decode(String.self, forKey: .name)
         featureDescription = try? decoder.decode(String.self, forKey: .description)
 
-        style = try? decoder.decode(AnyKMLStyle.self)
+        style = try? decoder.decode(AnyPlacemarkStyle.self)
 
         // geometry:
         let geometries = try decoder.decode([AnyKMLGeometry].self)
@@ -93,5 +140,32 @@ extension KMLPlacemark: KMLDecodable {
             throw GeometryCountError(count: geometries.count)
         }
         self.geometry = geometries.first
+    }
+}
+
+extension KMLPlacemark.AnyPlacemarkStyle: AnyEncodableKML {
+    var encodable: EncodingValueType {
+        switch self {
+        case .styleMap(let map):
+                .object(map)
+        case .styleUrl(let styleUrl):
+                .value(name: .styleUrl, value: styleUrl)
+        case .style(let style):
+                .object(style)
+        }
+    }
+}
+
+extension KMLPlacemark.AnyPlacemarkStyle: AnyDecodableKML {
+    init(from decoder: KMLDecoder) throws {
+        if decoder.tagName == KMLStyleMap.kmlTag {
+            self = try .styleMap(KMLStyleMap(from: decoder))
+        } else if decoder.tagName == KMLStyle.kmlTag {
+            self = try .style(KMLStyle(from: decoder))
+        } else if let styleUrl = try? decoder.as(KMLStyleUrl.self, forKey: .styleUrl) {
+            self = .styleUrl(styleUrl)
+        } else {
+            throw UnsupportedType()
+        }
     }
 }

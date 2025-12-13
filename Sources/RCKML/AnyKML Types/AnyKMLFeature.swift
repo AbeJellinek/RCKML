@@ -8,6 +8,7 @@
 public enum AnyKMLFeature: AnyKML {
     case placemark(KMLPlacemark)
     case folder(KMLFolder)
+    case document(KMLDocument)
 
     public var wrapped: any KMLFeature {
         switch self {
@@ -15,6 +16,8 @@ public enum AnyKMLFeature: AnyKML {
             placemark
         case .folder(let folder):
             folder
+        case .document(let document):
+            document
         }
     }
 
@@ -24,6 +27,8 @@ public enum AnyKMLFeature: AnyKML {
             self = .folder(folder)
         case let placemark as KMLPlacemark:
             self = .placemark(placemark)
+        case let document as KMLDocument:
+            self = .document(document)
         default:
             throw UnsupportedType()
         }
@@ -39,6 +44,8 @@ extension AnyKMLFeature: AnyDecodableKML {
             self = try .folder(KMLFolder(from: decoder))
         case KMLPlacemark.kmlTag:
             self = try .placemark(KMLPlacemark(from: decoder))
+        case KMLDocument.kmlTag:
+            self = try .document(KMLDocument(from: decoder))
         default:
             throw UnsupportedType()
         }
@@ -52,6 +59,8 @@ extension AnyKMLFeature: AnyEncodableKML {
                 .object(placemark)
         case .folder(let folder):
                 .object(folder)
+        case .document(let document):
+                .object(document)
         }
     }
 }

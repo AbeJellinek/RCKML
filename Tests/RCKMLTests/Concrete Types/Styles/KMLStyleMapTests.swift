@@ -11,20 +11,9 @@ import Testing
 
 struct KMLStyleMapTests {
     @Test func decodeWithStyleUrls() throws {
-        let decoder = try KMLDecoder(testXml: """
-            <StyleMap id="URLs Example">
-            <Pair>
-            <key>normal</key>
-            <styleUrl>#normalStyle</styleUrl>
-            </Pair>
-            <Pair>
-            <key>highlight</key>
-            <styleUrl>#highlightStyle</styleUrl>
-            </Pair>
-            </StyleMap>
-            """)
+        let decoder = try KMLDecoder(testXml: Samples.Styles.styleMapWithUrlsXml)
         let styleMap = try decoder.decode(KMLStyleMap.self)
-        #expect(styleMap.id == "URLs Example")
+        #expect(styleMap.id == "urlExample")
 
         switch styleMap.normalStyle {
         case .styleUrl(let url):
@@ -42,20 +31,9 @@ struct KMLStyleMapTests {
     }
 
     @Test func decodeWithStyles() throws {
-        let decoder = try KMLDecoder(testXml: """
-            <StyleMap id="Styles Example">
-            <Pair>
-            <key>normal</key>
-            <Style id="normalStyle"></Style>
-            </Pair>
-            <Pair>
-            <key>highlight</key>
-            <Style id="highlightStyle"></Style>
-            </Pair>
-            </StyleMap>
-            """)
+        let decoder = try KMLDecoder(testXml: Samples.Styles.styleMapWithStylesXml)
         let styleMap = try decoder.decode(KMLStyleMap.self)
-        #expect(styleMap.id == "Styles Example")
+        #expect(styleMap.id == "styleExample")
 
         switch styleMap.normalStyle {
         case .style(let style):

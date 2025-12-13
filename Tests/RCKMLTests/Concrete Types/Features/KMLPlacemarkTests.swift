@@ -50,6 +50,16 @@ struct KMLPlacemarkTests {
         #expect(placemark.style?.wrapped is KMLStyle)
     }
 
+    @Test func decodeWithStyleMap() throws {
+        let decoder = try KMLDecoder(testXml: """
+            <Placemark>
+            \(Samples.Styles.styleMapWithStylesXml)
+            </Placemark>
+            """)
+        let placemark = try decoder.decode(KMLPlacemark.self)
+        #expect(placemark.style?.wrapped is KMLStyleMap)
+    }
+
     @Test func decodeFailingWithTwoGeometries() throws {
         let decoder = try KMLDecoder(testXml: """
             <Placemark>
@@ -105,6 +115,20 @@ struct KMLPlacemarkTests {
         let xmlElement = encoder.xml
         let styleElement = try xmlElement.exactlyOneChild(named: "Style")
         #expect(styleElement.attributes["id"] == "myStyle")
+    }
+
+    @Test func encodeWithStyleMap() throws {
+        let styleMap = KMLStyleMap(
+            id: "myMap",
+            normal: KMLStyleUrl(styleId: "normal"),
+            highlight: KMLStyleUrl(styleId: "highlight")
+        )
+        let placemark = KMLPlacemark(name: nil, geometry: nil, styleMap: styleMap)
+        let encoder = try KMLEncoder(wrapping: placemark)
+
+        let xmlElement = encoder.xml
+        let styleElement = try xmlElement.exactlyOneChild(named: "StyleMap")
+        #expect(styleElement.attributes["id"] == "myMap")
     }
 
     @Test func encodeWithPoint() throws {

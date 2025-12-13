@@ -34,6 +34,16 @@ struct AnyFeatureTests {
         default:
             Issue.record()
         }
+
+        // Document
+        let document = KMLDocument(id: "document")
+        let anyDocument = try AnyKMLFeature(document)
+        switch anyDocument {
+        case .document(let wrapped):
+            #expect(wrapped.id == "document")
+        default:
+            Issue.record()
+        }
     }
 
     @Test func decodeFolder() throws {
@@ -65,6 +75,19 @@ struct AnyFeatureTests {
         }
     }
 
+    @Test func decodeDocument() throws {
+        let decoder = try KMLDecoder(testXml: """
+            <Document></Document>
+            """)
+        let anyFeature = try decoder.decode(AnyKMLFeature.self)
+        switch anyFeature {
+        case .document(_):
+            break
+        default:
+            Issue.record()
+        }
+    }
+
     @Test func encodeFolder() throws {
         let folder = KMLFolder(id: "folder", name: "My Folder")
         let anyFeature = try AnyKMLFeature(folder)
@@ -87,5 +110,15 @@ struct AnyFeatureTests {
         let xmlElement = encoder.xml
         #expect(xmlElement.name == "Placemark")
         #expect(xmlElement.attributes["id"] == "placemark")
+    }
+
+    @Test func encodeDocument() throws {
+        let document = KMLDocument(id: "sampleDocument")
+        let anyFeature = try AnyKMLFeature(document)
+        let encoder = try KMLEncoder(wrapping: anyFeature)
+
+        let xmlElement = encoder.xml
+        #expect(xmlElement.name == "Document")
+        #expect(xmlElement.attributes["id"] == "sampleDocument")
     }
 }
