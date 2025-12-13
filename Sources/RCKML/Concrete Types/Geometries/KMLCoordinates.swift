@@ -34,18 +34,12 @@ enum CoordinateParseError: Error, Equatable {
 }
 
 extension KMLCoordinate: KMLValue {
-    // TODO: replace with `.formatted(...)`
-    private static let formatter: NumberFormatter = {
-        let res = NumberFormatter()
-        res.minimumFractionDigits = 1
-        res.maximumFractionDigits = 6
-        return res
-    }()
+    private static let coordinateFormat = FloatingPointFormatStyle<Double>.number.precision(.fractionLength(1...6))
 
     var kmlString: String {
-        let lonString = Self.formatter.string(from: NSNumber(value: longitude)) ?? "\(longitude)"
-        let latString = Self.formatter.string(from: NSNumber(value: latitude)) ?? "\(latitude)"
-        let altString = altitude.flatMap { Self.formatter.string(from: NSNumber(value: $0)) }
+        let lonString = longitude.formatted(Self.coordinateFormat)
+        let latString = latitude.formatted(Self.coordinateFormat)
+        let altString = altitude.flatMap { $0.formatted(.number.precision(.fractionLength(1))) }
         return [lonString, latString, altString].compactMap(\.self).joined(separator: ",")
     }
     

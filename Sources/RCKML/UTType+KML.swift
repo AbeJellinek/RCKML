@@ -7,7 +7,6 @@
 
 import UniformTypeIdentifiers
 
-@available(macOS 11.0, iOS 14.0, watchOS 7.0, *)
 public extension UTType {
     static var kml: UTType {
         let tags = UTType.types(tag: "kml", tagClass: .filenameExtension, conformingTo: .xml)
