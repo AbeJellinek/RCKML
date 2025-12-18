@@ -5,6 +5,11 @@
 //  Created by Ryan Linn on 11/30/25.
 //
 
+/// A type-erasing wrapper for `KMLFeature` values, restricting them to the concrete Feature types in the
+/// KML language -- Placemark, Folder, and Document.
+///
+/// `AnyKMLFeature` is used in `KMLFile`, `KMLDocument`, and `KMLContainer` types to provide
+/// access to the contained Features.
 public enum AnyKMLFeature: AnyKML {
     case placemark(KMLPlacemark)
     case folder(KMLFolder)

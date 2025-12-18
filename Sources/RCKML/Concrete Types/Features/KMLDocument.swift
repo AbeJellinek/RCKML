@@ -11,7 +11,7 @@ import ZIPFoundation
 
 /// A container for Features and Styles, usually at the root of the KML file.
 ///
-/// /// For reference, see [KML Spec](https://developers.google.com/kml/documentation/kmlreference#document)
+/// For reference, see [KML Spec](https://developers.google.com/kml/documentation/kmlreference#document)
 public struct KMLDocument: KMLContainer {
     public var id: String?
     public var name: String?

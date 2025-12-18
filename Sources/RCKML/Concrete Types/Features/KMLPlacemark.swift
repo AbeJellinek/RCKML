@@ -79,6 +79,8 @@ public struct KMLPlacemark: KMLFeature {
 // MARK: - Placemark Style
 
 extension KMLPlacemark {
+    /// A type-erasing wrapper for the types of Style that can be used in a Placemark -- either a direct style
+    /// using `KMLStyle` or `KMLStyleMap`, or a reference to a shared style using `KMLStyleUrl`.
     public enum AnyPlacemarkStyle: AnyKML {
         case styleMap(KMLStyleMap)
         case style(KMLStyle)

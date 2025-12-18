@@ -9,6 +9,6 @@
 ///
 /// For definition, see [KML Spec](https://developers.google.com/kml/documentation/kmlreference#container)
 public protocol KMLContainer: KMLFeature {
-    /// An array of all contained KMLFeatures in this container.
+    /// An array of all contained `KMLFeatures` in this container.
     var features: [AnyKMLFeature] { get }
 }

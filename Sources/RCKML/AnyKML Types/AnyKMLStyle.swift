@@ -5,6 +5,8 @@
 //  Created by Ryan Linn on 11/30/25.
 //
 
+/// A type-erasing wrapper used in `KMLStyleMap` to refer either to a `KMLStyle` or `KMLStyleUrl`
+/// contained in the map.
 public enum AnyKMLStyle: AnyKML {
     case styleUrl(KMLStyleUrl)
     case style(KMLStyle)

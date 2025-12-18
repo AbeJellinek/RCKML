@@ -5,6 +5,8 @@
 //  Created by Ryan Linn on 11/30/25.
 //
 
+/// A type-erasing wrapper for `KMLStyleMap` and `KMLStyle` used in `KMLDocument` to refer to
+/// shared styles in the document.
 public enum AnyKMLStyleSelector: AnyKML {
     case styleMap(KMLStyleMap)
     case style(KMLStyle)

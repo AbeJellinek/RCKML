@@ -5,6 +5,11 @@
 //  Created by Ryan Linn on 11/30/25.
 //
 
+/// A type-erasing wrapper for `KMLGeometry` values, restricting them to the concrete Geometry types in the
+/// KML language -- Point, LineString, Polygon, and MultiGeometry.
+///
+/// `AnyKMLGeometry` is used in `KMLPlacemark` and `KMLMultiGeometry` to provide access to
+/// contained Geometries.
 public enum AnyKMLGeometry: AnyKML {
     case lineString(KMLLineString)
     case polygon(KMLPolygon)

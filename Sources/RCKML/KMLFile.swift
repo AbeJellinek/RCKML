@@ -9,6 +9,7 @@ import AEXML
 import Foundation
 import ZIPFoundation
 
+/// Errors that can occur when reading or writing KML/KMZ data via `KMLFile`.
 public enum KMLFileError: Error {
     case failedStringConversion
     case kmzReadFailure
@@ -18,6 +19,17 @@ public enum KMLFileError: Error {
     case unknownFileExtension(String)
 }
 
+/// A wrapper for reading and writing KML/KMZ files.
+///
+/// `KMLFile` represents the file-level container for KML data. It can contain one or more `KMLFeature`
+/// objects (typically a single `KMLDocument`) wrapped in `AnyKMLFeature` enum. Use `KMLFile`
+/// for reading and writing KML data to and from file.
+///
+/// To write KML files, construct your `KMLFile` using either of the `init(features:)` initializers, and
+/// then create `Data` with either `kmlData()` or `kmzData()` functions.
+///
+/// To read KML files, initialize the `KMLFile` with initializers that take either `Data`, `String`, or `URL`,
+/// and then read the contained data by iterating the `features` property.
 public struct KMLFile {
     public var features: [AnyKMLFeature]
 
@@ -28,7 +40,12 @@ public struct KMLFile {
     public init(features: [any KMLFeature]) throws {
         self.features = try features.map(AnyKMLFeature.init)
     }
-
+    
+    /// Initializes `KMLFile` from raw XML file data.
+    ///
+    /// - Parameter data: The raw XML file data to parse.
+    ///
+    /// - Throws: If XML could not be parsed from the file data, or if any `KMLFeature` failed to decode.
     public init(_ data: Data) throws {
         let xmlDoc = try AEXMLDocument(xml: data)
         let kmlElement = xmlDoc["kml"]
@@ -39,7 +56,13 @@ public struct KMLFile {
         let decoder = KMLDecoder(kmlElement)
         self.features = try decoder.decode([AnyKMLFeature].self)
     }
-
+    
+    /// Initializes `KMLFile` from data in a KMZ file.
+    ///
+    /// - Parameter kmzData: The raw data of the KMZ file.
+    ///
+    /// - Throws: If the KMZ file is missing its internal KML file, if the KML file could not be parsed into
+    /// XML, or if any `KMLFeature` in the file failed to decode.
     public init(kmzData: Data) throws {
         let archive = try Archive(data: kmzData, accessMode: .read, pathEncoding: .utf8)
 
@@ -55,7 +78,12 @@ public struct KMLFile {
 
         try self.init(extractedData)
     }
-
+    
+    /// Initializes `KMLFile` from a raw XML string.
+    ///
+    /// - Parameter kmlString: The raw XML string to parse.
+    ///
+    /// - Throws: If the XML string could not be parsed, or if any `KMLFeature` failed to decode.
     public init(_ kmlString: String) throws {
         guard let data = kmlString.data(using: .utf8) else {
             throw KMLFileError.failedStringConversion
@@ -63,8 +91,12 @@ public struct KMLFile {
         try self.init(data)
     }
 
-    /// Initializes a KMLDocument from a fileUrl, which must have a path extension of either "KML" or
-    /// "KMZ" (neither are case-sensitive).
+    /// Initializes `KMLFile` from a file at the given URL.
+    ///
+    /// - Parameter url: The url of the file to read
+    ///
+    /// - Throws: If the file is not of a recognized format (KML or KMZ), or if the decoder fails to parse
+    /// the XML contents of the file, or if any `KMLFeature` in the file fails to decode.
     public init(_ url: URL) throws {
         let data = try Data(contentsOf: url)
         switch url.pathExtension.lowercased() {
@@ -76,7 +108,6 @@ public struct KMLFile {
             throw KMLFileError.unknownFileExtension(url.pathExtension)
         }
     }
-
 
     /// Returns the full string representation of the KML file.
     public func kmlString() throws -> String {
