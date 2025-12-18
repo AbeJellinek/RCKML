@@ -5,8 +5,8 @@
 //  Created by Ryan Linn on 6/17/21.
 //
 
-/// A Feature that is associated with a Geometry, and the main tool  in a KML file. A placemark includes a
-/// Geometry object, and any  descriptive information about it.
+/// A Feature that is associated with a Geometry, and the primary feature type in a KML file. A placemark
+/// includes a Geometry object and any descriptive information about it.
 ///
 /// For reference, see [KML Spec](https://developers.google.com/kml/documentation/kmlreference#placemark)
 public struct KMLPlacemark: KMLFeature {

@@ -16,6 +16,9 @@ public struct KMLMultiGeometry: KMLGeometry {
         "MultiGeometry"
     }
 
+    /// Initializes an empty `KMLMultiGeometry` with an optional identifier.
+    ///
+    /// - Parameter id: Optional identifier for the geometry's KML element.
     public init(id: String? = nil) {
         self.id = id
         self.geometries = []
@@ -29,6 +32,14 @@ public struct KMLMultiGeometry: KMLGeometry {
         self.geometries = geometries
     }
 
+    /// Initializes a `KMLMultiGeometry` from raw geometry protocol types.
+    ///
+    /// - Parameters:
+    ///   - id: Optional identifier for the geometry's KML element.
+    ///   - geometries: An array of concrete geometry values conforming to `KMLGeometry`, which will be
+    ///                 wrapped into `AnyKMLGeometry`.
+    ///
+    /// - Throws: `UnsupportedType` if any geometry cannot be represented as `AnyKMLGeometry`.
     public init(
         id: String? = nil,
         geometries: [any KMLGeometry]

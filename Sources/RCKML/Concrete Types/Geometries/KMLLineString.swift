@@ -5,7 +5,7 @@
 //  Created by Ryan Linn on 6/17/21.
 //
 
-/// A series of KMLCoordinates connected in order to form  a line on the map.
+/// A series of `KMLCoordinate` values connected in order to form a line on the map.
 ///
 /// For reference, see [KML Documentation](https://developers.google.com/kml/documentation/kmlreference#linestring)
 public struct KMLLineString: KMLGeometry {

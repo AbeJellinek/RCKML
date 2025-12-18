@@ -5,6 +5,7 @@
 //  Created by Ryan Linn on 11/17/25.
 //
 
+/// Error thrown when a value cannot be represented by an `AnyKML` wrapper.
 public struct UnsupportedType: Error {}
 
 /// A protocol adopted by type-erasing wrappers around KML element groups (features, geometries, styles, etc)

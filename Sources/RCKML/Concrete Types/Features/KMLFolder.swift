@@ -5,7 +5,7 @@
 //  Created by Ryan Linn on 6/17/21.
 //
 
-/// A feature to be included in KML files, which can contain any number of  other KML features, including sub-folders.
+/// A feature to be included in KML files, which can contain any number of other KML features, including sub-folders.
 ///
 /// For reference, see [KML Spec](https://developers.google.com/kml/documentation/kmlreference#folder)
 public struct KMLFolder: KMLFeature, KMLContainer {
@@ -18,6 +18,13 @@ public struct KMLFolder: KMLFeature, KMLContainer {
         "Folder"
     }
 
+    /// Initializes a `KMLFolder` with already-wrapped features.
+    ///
+    /// - Parameters:
+    ///   - id: Optional identifier for the folder's KML element.
+    ///   - name: Optional user-visible name for the folder.
+    ///   - featureDescription: Optional description for the folder.
+    ///   - features: An array of features already wrapped in `AnyKMLFeature`.
     public init(
         id: String? = nil,
         name: String? = nil,
@@ -30,6 +37,16 @@ public struct KMLFolder: KMLFeature, KMLContainer {
         self.features = features
     }
 
+    /// Initializes a `KMLFolder` from raw feature protocol types.
+    ///
+    /// - Parameters:
+    ///   - id: Optional identifier for the folder's KML element.
+    ///   - name: Optional user-visible name for the folder.
+    ///   - featureDescription: Optional description for the folder.
+    ///   - features: An array of concrete feature values conforming to `KMLFeature`, which will be
+    ///               wrapped into `AnyKMLFeature`.
+    ///
+    /// - Throws: `UnsupportedType` if any feature cannot be represented as `AnyKMLFeature`.
     public init(
         id: String? = nil,
         name: String? = nil,
