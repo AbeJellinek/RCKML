@@ -13,6 +13,8 @@ import ZIPFoundation
 ///
 /// For reference, see [KML Spec](https://developers.google.com/kml/documentation/kmlreference#document)
 public struct KMLDocument: KMLContainer {
+    public struct UnidentifiedStyleError: Error {}
+
     public var id: String?
     public var name: String?
     public var featureDescription: String?
@@ -23,13 +25,23 @@ public struct KMLDocument: KMLContainer {
         "Document"
     }
 
+    /// Initializes a `KMLDocument` with already-wrapped features and styles.
+    ///
+    /// - Parameters:
+    ///   - id: Optional identifier for the document's KML element.
+    ///   - name: Optional user-visible name for the document.
+    ///   - featureDescription: Optional description of the document.
+    ///   - features: An array of features already wrapped in `AnyKMLFeature`.
+    ///   - styles: An array of style selectors already wrapped in `AnyKMLStyleSelector`.
+    ///
+    /// - Throws: `UnidentifiedStyleError` if any style selector in `styles` has no `id` value.
     public init(
         id: String? = nil,
         name: String? = nil,
         featureDescription: String? = nil,
         features: [AnyKMLFeature] = [],
         styles: [AnyKMLStyleSelector] = []
-    ) {
+    ) throws(UnidentifiedStyleError) {
         self.id = id
         self.name = name
         self.featureDescription = featureDescription
@@ -41,11 +53,25 @@ public struct KMLDocument: KMLContainer {
                 identifiedStyles[styleId] = aStyleSelector
             } else {
                 // Document styles must have an ID
+                throw UnidentifiedStyleError()
             }
         }
         self.styles = identifiedStyles
     }
 
+    /// Initializes a `KMLDocument` from raw feature and style selector protocol types.
+    ///
+    /// - Parameters:
+    ///   - id: Optional identifier for the document's KML element.
+    ///   - name: Optional user-visible name for the document.
+    ///   - featureDescription: Optional description of the document.
+    ///   - features: An array of features already wrapped in `AnyKMLFeature`.
+    ///   - styles: An array of style selectors conforming to `KMLStyleSelector`, which will be
+    ///             wrapped into `AnyKMLStyleSelector`.
+    ///
+    /// - Throws:
+    ///   - `UnsupportedType` if any style selector cannot be represented as `AnyKMLStyleSelector`.
+    ///   - `UnidentifiedStyleError` if any style selector in `styles` has no `id` value.
     public init(
         id: String? = nil,
         name: String? = nil,
@@ -54,7 +80,7 @@ public struct KMLDocument: KMLContainer {
         styles: [any KMLStyleSelector]
     ) throws {
         let anyStyles = try styles.map(AnyKMLStyleSelector.init)
-        self.init(
+        try self.init(
             id: id,
             name: name,
             featureDescription: featureDescription,
@@ -63,6 +89,19 @@ public struct KMLDocument: KMLContainer {
         )
     }
 
+    /// Initializes a `KMLDocument` from raw feature protocol types and already-wrapped styles.
+    ///
+    /// - Parameters:
+    ///   - id: Optional identifier for the document's KML element.
+    ///   - name: Optional user-visible name for the document.
+    ///   - featureDescription: Optional description of the document.
+    ///   - features: An array of concrete feature values conforming to `KMLFeature`, which will be
+    ///               wrapped into `AnyKMLFeature`.
+    ///   - styles: An array of style selectors already wrapped in `AnyKMLStyleSelector`.
+    ///
+    /// - Throws:
+    ///   - `UnsupportedType` if any feature cannot be represented as `AnyKMLFeature`.
+    ///   - `UnidentifiedStyleError` if any style selector in `styles` has no `id` value.
     public init(
         id: String? = nil,
         name: String? = nil,
@@ -71,7 +110,7 @@ public struct KMLDocument: KMLContainer {
         styles: [AnyKMLStyleSelector] = []
     ) throws {
         let anyFeatures = try features.map(AnyKMLFeature.init)
-        self.init(
+        try self.init(
             id: id,
             name: name,
             featureDescription: featureDescription,
@@ -80,6 +119,21 @@ public struct KMLDocument: KMLContainer {
         )
     }
 
+    /// Initializes a `KMLDocument` from raw feature and style selector protocol types.
+    ///
+    /// - Parameters:
+    ///   - id: Optional identifier for the document's KML element.
+    ///   - name: Optional user-visible name for the document.
+    ///   - featureDescription: Optional description of the document.
+    ///   - features: An array of concrete feature values conforming to `KMLFeature`, which will be
+    ///               wrapped into `AnyKMLFeature`.
+    ///   - styles: An array of style selectors conforming to `KMLStyleSelector`, which will be
+    ///             wrapped into `AnyKMLStyleSelector`.
+    ///
+    /// - Throws:
+    ///   - `UnsupportedType` if any feature or style selector cannot be represented as the
+    ///     corresponding `AnyKML*` wrapper type.
+    ///   - `UnidentifiedStyleError` if any style selector in `styles` has no `id` value.
     public init(
         id: String? = nil,
         name: String? = nil,
@@ -89,7 +143,7 @@ public struct KMLDocument: KMLContainer {
     ) throws {
         let anyStyles = try styles.map(AnyKMLStyleSelector.init)
         let anyFeatures = try features.map(AnyKMLFeature.init)
-        self.init(
+        try self.init(
             id: id,
             name: name,
             featureDescription: featureDescription,
@@ -125,7 +179,7 @@ extension KMLDocument: KMLDecodable {
         let features = try decoder.decode([AnyKMLFeature].self)
         let styles = try decoder.decode([AnyKMLStyleSelector].self)
 
-        self.init(
+        try self.init(
             id: id,
             name: name,
             featureDescription: featureDescription,

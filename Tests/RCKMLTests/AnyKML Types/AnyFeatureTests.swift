@@ -36,7 +36,7 @@ struct AnyFeatureTests {
         }
 
         // Document
-        let document = KMLDocument(id: "document")
+        let document = try KMLDocument(id: "document")
         let anyDocument = try AnyKMLFeature(document)
         switch anyDocument {
         case .document(let wrapped):
@@ -113,7 +113,7 @@ struct AnyFeatureTests {
     }
 
     @Test func encodeDocument() throws {
-        let document = KMLDocument(id: "sampleDocument")
+        let document = try KMLDocument(id: "sampleDocument")
         let anyFeature = try AnyKMLFeature(document)
         let encoder = try KMLEncoder(wrapping: anyFeature)
 

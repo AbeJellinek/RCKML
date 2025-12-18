@@ -10,6 +10,20 @@ import AEXML
 import Testing
 
 struct KMLDocumentTests {
+    @Test func requireIdentifiedStyles() throws {
+        let unidentifiedStyle = KMLStyle()
+        #expect(throws: KMLDocument.UnidentifiedStyleError.self) {
+            let _ = try KMLDocument(styles: [
+                .style(unidentifiedStyle)
+            ])
+        }
+
+        let identifiedStyle = KMLStyle(id: "myStyle")
+        let _ = try KMLDocument(styles: [
+            .style(identifiedStyle)
+        ])
+    }
+
     @Test func decodeFullDocument() throws {
         let decoder = try KMLDecoder(testXml: Samples.Document.sampleXml)
         let document = try decoder.decode(KMLDocument.self)
@@ -42,7 +56,7 @@ struct KMLDocumentTests {
     }
 
     @Test func encodeFullDocument() throws {
-        let document = KMLDocument(
+        let document = try KMLDocument(
             id: "sampleDocument",
             name: "Sample Document",
             featureDescription: "A sample document",
