@@ -37,12 +37,10 @@ https://github.com/RCCoop/RCKML.git
 All types use [Google's KML Reference](https://developers.google.com/kml/documentation/kmlreference) as their source material. _Not all types are supported with all options available to KML files_. I've focused on types and features that can be easily translated into MapKit, but may add further types over time.
 
 - **`KMLFile`**
-  File-level wrapper used to read and write KML/KMZ data. It owns an array of `AnyKMLFeature`, which typically contains a single `KMLDocument`.
-
-- **`KMLDocument`**
-  A KML **Document** element, usually the root of a file. It can contain features (`KMLFolder`, `KMLPlacemark`, nested `KMLDocument`) and shared styles (`KMLStyle`, `KMLStyleMap`).
+  File-level wrapper used to read and write KML/KMZ data. Contains an array of `AnyKMLFeature`, which typically consists of a single `KMLDocument`.
 
 - **Features**
+  - `KMLDocument`: A container that can contain other features and shared styles (`KMLStyle`, `KMLStyleMap`).
   - `KMLPlacemark`: A feature associated with a geometry and optional style.
   - `KMLFolder`: A container feature that holds other features (including sub-folders).
 
@@ -123,15 +121,13 @@ let placemark = try KMLPlacemark(
     id: "whiteHouse",
     name: "The White House",
     featureDescription: "The residence of the President of the United States.",
-    geometry: .point(point)
+    geometry: point
 )
 
 // Create a KMLDocument and wrap the placemark
 let document = try KMLDocument(
     name: "Sample Document",
-    features: [
-        .placemark(placemark)
-    ]
+    features: [placemark]
 )
 
 // Create a KMLFile
