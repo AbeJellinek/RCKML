@@ -385,4 +385,15 @@ struct KMLDecoder {
             .filter { $0.name == tag.name }
             .map { KMLDecoder($0) }
     }
+
+    /// Decodes all child elements with the given tag name as string values.
+    ///
+    /// Unlike `decode(_:forKey:)` which returns only the first match, this returns
+    /// all children matching the tag name. Useful for elements like `gx:Track` where
+    /// multiple `<when>` or `<gx:coord>` children appear.
+    func decodeAll(forKey key: KMLTagName) -> [String] {
+        xml.children
+            .filter { $0.name == key.name }
+            .map(\.string)
+    }
 }

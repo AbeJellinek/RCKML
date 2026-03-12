@@ -6,7 +6,7 @@
 //
 
 /// A type-erasing wrapper for `KMLGeometry` values, restricting them to the concrete Geometry types in the
-/// KML language -- Point, LineString, Polygon, and MultiGeometry.
+/// KML language -- Point, LineString, Polygon, MultiGeometry, and gx:Track.
 ///
 /// `AnyKMLGeometry` is used in `KMLPlacemark` and `KMLMultiGeometry` to provide access to
 /// contained Geometries.
@@ -15,6 +15,7 @@ public enum AnyKMLGeometry: AnyKML {
     case polygon(KMLPolygon)
     case point(KMLPoint)
     case multiGeometry(KMLMultiGeometry)
+    case track(KMLTrack)
 
     public var wrapped: any KMLGeometry {
         switch self {
@@ -26,6 +27,8 @@ public enum AnyKMLGeometry: AnyKML {
             point
         case .multiGeometry(let multiGeometry):
             multiGeometry
+        case .track(let track):
+            track
         }
     }
 
@@ -39,6 +42,8 @@ public enum AnyKMLGeometry: AnyKML {
             self = .point(point)
         case let multiGeometry as KMLMultiGeometry:
             self = .multiGeometry(multiGeometry)
+        case let track as KMLTrack:
+            self = .track(track)
         default:
             throw UnsupportedType()
         }
@@ -58,6 +63,8 @@ extension AnyKMLGeometry: AnyDecodableKML {
             self = try .point(KMLPoint(from: decoder))
         case KMLMultiGeometry.kmlTag:
             self = try .multiGeometry(KMLMultiGeometry(from: decoder))
+        case KMLTrack.kmlTag:
+            self = try .track(KMLTrack(from: decoder))
         default:
             throw UnsupportedType()
         }
@@ -75,6 +82,8 @@ extension AnyKMLGeometry: AnyEncodableKML {
                 .object(point)
         case .multiGeometry(let multiGeometry):
                 .object(multiGeometry)
+        case .track(let track):
+                .object(track)
         }
     }
 }

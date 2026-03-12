@@ -101,6 +101,17 @@ enum Samples {
             "<Polygon><outerBoundaryIs><LinearRing><coordinates>0,0 0,2 1,2 0,0</coordinates></LinearRing></outerBoundaryIs></Polygon>"
         }
 
+        static var trackXml: String {
+            """
+            <gx:Track>
+            <when>2024-01-15T10:00:00Z</when>
+            <when>2024-01-15T10:00:30Z</when>
+            <gx:coord>-112.9 37.3 1500.0</gx:coord>
+            <gx:coord>-112.8 37.4 1520.0</gx:coord>
+            </gx:Track>
+            """
+        }
+
         static var multiGeometryXml: String {
             "<MultiGeometry>" + pointXml + lineStringXml + polygonXml + "</MultiGeometry>"
         }

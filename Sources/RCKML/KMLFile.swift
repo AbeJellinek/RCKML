@@ -33,6 +33,34 @@ public enum KMLFileError: Error {
 public struct KMLFile {
     public var features: [AnyKMLFeature]
 
+    /// Whether any feature in the file uses Google Earth `gx:` extensions.
+    private var usesGxExtensions: Bool {
+        features.contains(where: Self.featureUsesGx)
+    }
+
+    private static func featureUsesGx(_ feature: AnyKMLFeature) -> Bool {
+        switch feature {
+        case .placemark(let pm):
+            guard let geometry = pm.geometry else { return false }
+            return geometryUsesGx(geometry)
+        case .folder(let folder):
+            return folder.features.contains(where: featureUsesGx)
+        case .document(let doc):
+            return doc.features.contains(where: featureUsesGx)
+        }
+    }
+
+    private static func geometryUsesGx(_ geometry: AnyKMLGeometry) -> Bool {
+        switch geometry {
+        case .track:
+            return true
+        case .multiGeometry(let mg):
+            return mg.geometries.contains(where: geometryUsesGx)
+        case .lineString, .polygon, .point:
+            return false
+        }
+    }
+
     public init(features: [AnyKMLFeature]? = nil) {
         self.features = features ?? []
     }
@@ -112,8 +140,11 @@ public struct KMLFile {
     /// Returns the full string representation of the KML file.
     public func kmlString() throws -> String {
         let xmlDoc = AEXMLDocument()
-        let baseAttributes = ["xmlns" : "http://www.opengis.net/kml/2.2"]
-        let kmlRoot = xmlDoc.addChild(name: "kml", attributes: baseAttributes)
+        var attributes = ["xmlns" : "http://www.opengis.net/kml/2.2"]
+        if usesGxExtensions {
+            attributes["xmlns:gx"] = "http://www.google.com/kml/ext/2.2"
+        }
+        let kmlRoot = xmlDoc.addChild(name: "kml", attributes: attributes)
 
         let encoder = KMLEncoder(kmlRoot)
         for feature in features {

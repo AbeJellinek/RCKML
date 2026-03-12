@@ -172,6 +172,15 @@ struct KMLEncoder {
     /// // </Point>
     /// // </Placemark>
     /// ```
+    /// Appends a child element with a basic value, without removing existing elements of the same name.
+    ///
+    /// Unlike `encode(tag:value:)` which replaces existing elements, this always appends.
+    /// Useful for elements like `gx:Track` where multiple `<when>` or `<gx:coord>` children are needed.
+    func encodeAppend<V: KMLValue>(tag: KMLTagName, value: V) {
+        let element = AEXMLElement(name: tag.name, value: value.kmlString)
+        xml.addChild(element)
+    }
+
     func encodeChild<C: AnyEncodableKML>(_ object: C?) throws {
         switch object?.encodable {
         case .object(let objectType):

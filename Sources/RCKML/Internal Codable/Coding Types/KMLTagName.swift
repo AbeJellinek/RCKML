@@ -31,4 +31,6 @@ struct KMLTagName: Sendable, Hashable {
     static let styleUrl = KMLTagName("styleUrl")
     static let color = KMLTagName("color")
     static let width = KMLTagName("width")
+    static let when = KMLTagName("when")
+    static let gxCoord = KMLTagName("gx:coord")
 }
